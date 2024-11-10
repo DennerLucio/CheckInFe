@@ -10,7 +10,7 @@ import {
   ScrollView,
   
 } from "react-native";
-import styles from "../Login/StyleLogin";
+import styles from "./StyleLogin";
 import { useNavigation, NavigationProp } from '@react-navigation/native';
 import { RootStackParamList } from '../../App';
 import { login } from '../../Services/AuthService';

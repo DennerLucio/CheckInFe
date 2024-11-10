@@ -2,7 +2,6 @@ import React from "react";
 import { Text, View } from "react-native";
 import styles from './StyleCardRelatorio';
 import { ListaRelatorioResponse } from "../../Services/RelatorioService";
-
 interface CardRelatorioProps {
   relatorio: ListaRelatorioResponse;
 }

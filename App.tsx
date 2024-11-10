@@ -1,13 +1,13 @@
 import { StyleSheet, Text, View } from 'react-native';
-import { Login } from '../CheckInFe/components/Login/Login'
-import { Turma } from '../CheckInFe/components/Turma/Turma'
-import { Relatorios } from '../CheckInFe/components/Relatorio/Relatorios'
-import { CadastrarRelatorio } from '../CheckInFe/components/CadastrarRelatorio/CadastrarRelatorio'
-import { CadastrarPessoa } from '../CheckInFe/components/CadastrarPessoa/CadastrarPessoa'
+import { Login } from './Screens/Login/Login'
+import { Turma } from './Screens/Turma/Turma'
+import { Relatorios } from './Screens/Relatorio/Relatorios'
+import { CadastrarRelatorio } from './Screens/CadastrarRelatorio/CadastrarRelatorio'
+import { CadastrarPessoa } from './Screens/CadastrarPessoa/CadastrarPessoa'
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { setTopLevelNavigator } from './Services/NavigationServices';
-import { DetalhesRelatorio } from '../CheckInFe/components/Relatorio/DetalhesRelatorio'; // Importe a tela
+import { DetalhesRelatorio } from './Screens/Relatorio/DetalhesRelatorio';
 
 export type RootStackParamList = {
   Turma: undefined;
