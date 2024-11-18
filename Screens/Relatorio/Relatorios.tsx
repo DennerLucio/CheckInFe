@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Text, View, FlatList, ActivityIndicator, Alert, TouchableOpacity } from "react-native";
 import { Picker } from "@react-native-picker/picker";
 import styles from "./StyleRelatorio";
-import { CardRelatorio } from "../CardRelatorio/CardRelatorio";
+import { CardRelatorio } from "../../components/CardRelatorio/CardRelatorio";
 import { ListaRelatorioResponse, listarRelatorios } from "../../Services/RelatorioService";
 import { buscaTurmas, GetTurmaResponse } from "../../Services/TurmaService";
 import { useNavigation, NavigationProp } from '@react-navigation/native';

@@ -10,7 +10,7 @@ const styles = StyleSheet.create({
       justifyContent:'space-around',
       alignItems:'center',
       marginBottom:10,
-
+      alignSelf: 'center',
     },
    
     txtDtRelatorio:{

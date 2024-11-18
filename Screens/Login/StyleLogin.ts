@@ -26,8 +26,8 @@ const styles = StyleSheet.create({
       width: '100%'
     },
     scrollViewContent: {
-      flexGrow: 1, // Faz o ScrollView ocupar o espaço completo
-      justifyContent: 'center', // Centraliza o conteúdo
+      flexGrow: 1, 
+      justifyContent: 'center',
     },
     containerImg:{
       width:'100%',
@@ -39,13 +39,6 @@ const styles = StyleSheet.create({
       position:'absolute',
       right:10,
       bottom:-25,
-     
-      // marginLeft:'100%',
-      // marginTop:'100%',
-      // transform: [
-      //   { translateX: -100 }, // Mover a imagem -100 unidades no eixo X
-      //   { translateY: -100 }, // Mover a imagem 50 unidades no eixo Y
-      // ],
     },
     title: {
       color:'#FFF',

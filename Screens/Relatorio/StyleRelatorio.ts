@@ -10,6 +10,7 @@ const styles = StyleSheet.create({
       justifyContent:'flex-start',
       alignItems:'center',
       paddingTop:25,
+      
     },
     txtDtRelatorio:{
       

@@ -45,8 +45,8 @@ export function CadastrarRelatorio() {
   useEffect(() => {
     const fetchAlunosEProfessores = async () => {
       try {
-        const alunosResponse = await buscaAluno(turmaId, 1, 10); // Usando o novo endpoint com paginação e quantidade de itens
-        const alunosData = alunosResponse.flatMap((classe) => classe.alunos); // Acessando os alunos dentro da classe
+        const alunosResponse = await buscaAluno(turmaId, 1, 10); 
+        const alunosData = alunosResponse.flatMap((classe) => classe.alunos);
 
         setAlunos(
           alunosData.map((aluno) => ({
@@ -55,7 +55,7 @@ export function CadastrarRelatorio() {
           }))
         );
 
-        // Buscar todos os professores
+
         const professoresResponse = await buscaProfessor();
         setProfessores(
           professoresResponse.map((professor) => ({
@@ -166,7 +166,7 @@ export function CadastrarRelatorio() {
           />
         </View>
         <View style={styles.labelinputs}>
-          <Text style={styles.label}> Visitantes:</Text>
+          <Text style={styles.label}>Visitantes:</Text>
           <TextInput
             style={styles.input}
             keyboardType="numeric"
@@ -231,8 +231,9 @@ export function CadastrarRelatorio() {
         <FlatList
           data={alunos}
           renderItem={renderItem}
+          style={styles.containerAlunos}
           keyExtractor={(item) => item.alunoId.toString()}
-          style={{ width: "100%", marginTop: 20 }}
+      
         />
       )}
 

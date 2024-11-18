@@ -13,21 +13,17 @@ interface ContentListProps {
   data: ContentItem[];
 }
 
-
-export const ContentTurmaList: React.FC<ContentListProps> = ({ data }) => {
+export function ContentTurmaList({ data }: ContentListProps) {
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
 
   const NavigateCardTurma = (id: number) => {
-    navigation.navigate('CadastrarRelatorio', { turmaId: id }); 
+    navigation.navigate('CadastrarRelatorio', { turmaId: id });
   };
 
   const renderItem = ({ item }: { item: ContentItem }) => (
     <TouchableOpacity onPress={() => NavigateCardTurma(item.id)}>
       <View style={styles.container}>
-        
-          <Text style={styles.txtTituloTurma}>{item.nome}</Text>
-        
-        
+        <Text style={styles.txtTituloTurma}>{item.nome}</Text>
       </View>
     </TouchableOpacity>
   );
@@ -42,4 +38,6 @@ export const ContentTurmaList: React.FC<ContentListProps> = ({ data }) => {
       showsVerticalScrollIndicator={false}
     />
   );
-};
+}
+
+export default ContentTurmaList;

@@ -11,6 +11,7 @@ const styles = StyleSheet.create({
       alignItems:'center',
       marginBottom:15,
       elevation: 5,
+      alignSelf: 'center',
     },
     txtTituloTurma:{
       height:'100%',
@@ -48,6 +49,7 @@ const styles = StyleSheet.create({
       justifyContent: 'center',
       alignItems: 'center',
       paddingBottom: 20,
+    
   },
 });
 

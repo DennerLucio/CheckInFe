@@ -3,11 +3,13 @@ import {StyleSheet } from 'react-native'
 const styles = StyleSheet.create({
     container: {
      flex:1,
-     paddingTop:25,
      width:'100%',
      justifyContent:'center',
-     alignItems:'center'
+     alignItems:'center',
+     paddingBottom:15,
+     gap:15,
     },
+
     containerTop:{
       width:'100%',
       height:'40%'
@@ -124,20 +126,26 @@ const styles = StyleSheet.create({
       height:'auto',
       width:"100%",
       gap:10,
-      padding:25
+      paddingTop:15,
+      paddingRight:15,
+      paddingLeft:15,
     },
     label:{
       width: "auto",
       height: "auto", 
-      fontSize:20,
+      fontSize:18,
       
+    },
+    containerAlunos:{
+      width:'100%'
+
     },
     input:{
         width: 100,
-        height: 35, // Altura do input
-        borderColor: 'rgba(0, 0, 0, 0.1)', // Cor da borda
-        borderWidth: 1, // Largura da borda
-        
+        height: 35, 
+        borderColor: 'rgba(0, 0, 0, 0.1)', 
+        borderWidth: 1, 
+        textAlign:'center',
         borderRadius: 5, 
     },
     labelinputs:{
@@ -159,6 +167,7 @@ const styles = StyleSheet.create({
         borderColor: 'rgba(0, 0, 0, 0.1)', 
         borderWidth: 1, 
         borderRadius: 5,
+        textAlign:'center',
     }
 });
 

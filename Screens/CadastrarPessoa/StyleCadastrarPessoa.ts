@@ -5,9 +5,10 @@ const styles = StyleSheet.create({
       flex:1,
       backgroundColor: '#FFF',
       width: '100%',
-      justifyContent:'center',
+      justifyContent:'flex-start',
       alignItems:'center',
-      gap:15
+      gap:15,
+      paddingTop:30
     },
     inputNome:{
       width:'70%',
@@ -34,6 +35,10 @@ const styles = StyleSheet.create({
     btnSubmitText:{
       color: '#fff',
       fontSize: 18,
+    },
+    textTitulo:{
+      fontSize:18,
+      fontWeight:'600'
     }
 });
 

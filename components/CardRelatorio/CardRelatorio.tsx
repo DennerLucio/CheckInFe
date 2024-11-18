@@ -29,7 +29,7 @@ export function CardRelatorio({ relatorio }: CardRelatorioProps) {
       {relatorio.nomeClasse && (
         <Text style={styles.txtObservacao}>{relatorio.nomeClasse}</Text>
       )}
-      {/* <Text style={styles.txtPresenca}>{presencasText}</Text> */}
+     
     </View>
   );
 }
