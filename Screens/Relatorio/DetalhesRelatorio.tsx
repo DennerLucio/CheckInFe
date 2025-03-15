@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, StyleSheet, ActivityIndicator } from "react-native";
+import { View, Text, StyleSheet, ActivityIndicator, Button, Alert } from "react-native";
 import { infoRelatorio, RelatorioResponse } from "../../Services/RelatorioService";
 import { RouteProp } from "@react-navigation/native";
-import { RootStackParamList } from "../../App"; 
+import { RootStackParamList } from "../../App";
+import { compartilharRelatorioPlanilha, baixarRelatorioPlanilha } from "../../Services/RelatorioService"; // Importe a função de download
+import { AxiosError } from 'axios';
 
 interface DetalhesRelatorioProps {
   route: RouteProp<RootStackParamList, "DetalhesRelatorio">;
@@ -38,6 +40,31 @@ export function DetalhesRelatorio({ route }: DetalhesRelatorioProps) {
     fetchRelatorio();
   }, [relatorioId]);
 
+  const handleGerarRelatorio = async () => {
+    try {
+      await compartilharRelatorioPlanilha();
+    } catch (error) {
+      console.error('Erro ao gerar planilha:', error);
+      setError('Não foi possível gerar a planilha.');
+    }
+  };
+
+  const handleBaixarRelatorio = async () => {
+    try {
+      await baixarRelatorioPlanilha(); // Chama a função de download do relatório
+      Alert.alert("Sucesso", "Relatório baixado com sucesso!", [{ text: "OK" }]);
+    } catch (error: unknown) {
+      console.error('Erro ao baixar planilha:', error);
+      if (error instanceof AxiosError && error.response) {
+        console.error('Resposta do erro:', error.response.data); // Exibe detalhes da resposta de erro
+        setError('Erro ao baixar o relatório: ' + error.response.data);
+      } else {
+        setError('Não foi possível baixar a planilha. Tente novamente mais tarde.');
+      }
+      Alert.alert("Erro", error instanceof Error ? error.message : "Ocorreu um erro inesperado.", [{ text: "OK" }]);
+    }
+  };
+
   if (loading) {
     return <ActivityIndicator size="large" color="#0000ff" />;
   }
@@ -64,6 +91,12 @@ export function DetalhesRelatorio({ route }: DetalhesRelatorioProps) {
         <Text style={styles.label}>Presentes: {relatorio.presentes}</Text>
         <Text style={styles.label}>Observação: {relatorio.observacao}</Text>
       </View>
+
+      {/* Botão para gerar o relatório em planilha */}
+      <Button title="Gerar Relatório em Planilha" onPress={handleGerarRelatorio} />
+
+      {/* Botão para baixar o relatório diretamente */}
+      <Button title="Baixar Relatório" onPress={handleBaixarRelatorio} />
     </View>
   );
 }
@@ -72,8 +105,8 @@ const styles = StyleSheet.create({
   container: {
     padding: 25,
   },
-  label:{
-    fontSize:18,
+  label: {
+    fontSize: 18,
   },
   title: {
     fontSize: 24,

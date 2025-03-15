@@ -55,10 +55,10 @@ export function Login() {
             <Text style={styles.titleSub}>Fé</Text>
           </View>
           <View style={styles.containerImg}>
-            <Image
+            {/* <Image
               style={styles.imgPray}
               source={require("../../assets/pray.png")}
-            />
+            /> */}
           </View>
         </View>
 

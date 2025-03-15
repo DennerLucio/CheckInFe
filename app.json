@@ -19,7 +19,11 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.dennerlucio.CheckInFe"
+      "package": "com.dennerlucio.CheckInFe",
+      "permissions": [
+        "READ_EXTERNAL_STORAGE",
+        "WRITE_EXTERNAL_STORAGE"
+      ]
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -31,3 +35,4 @@
     }
   }
 }
+

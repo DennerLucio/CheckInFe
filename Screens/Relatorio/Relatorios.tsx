@@ -6,8 +6,7 @@ import { CardRelatorio } from "../../components/CardRelatorio/CardRelatorio";
 import { ListaRelatorioResponse, listarRelatorios } from "../../Services/RelatorioService";
 import { buscaTurmas, GetTurmaResponse } from "../../Services/TurmaService";
 import { useNavigation, NavigationProp } from '@react-navigation/native';
-import { RootStackParamList } from '../../App'; 
-
+import { RootStackParamList } from '../../App';
 
 export function Relatorios() {
     const navigation = useNavigation<NavigationProp<RootStackParamList>>();
@@ -17,7 +16,7 @@ export function Relatorios() {
     const [loading, setLoading] = useState(false);
     const [turmas, setTurmas] = useState<{ id: number; nome: string }[]>([]);
 
-    const fetchRelatorios = async (params: { classeId?: number; data?: string } = {}) => {
+    const fetchRelatorios = async (params: { classeId?: number; startDate?: string; endDate?: string } = {}) => {
         setLoading(true);
         try {
             const data = await listarRelatorios(params);
@@ -48,20 +47,25 @@ export function Relatorios() {
     }, []);
 
     useEffect(() => {
-        if (selectedTurma || selectedData !== "Selecione") {
-            fetchRelatorios({
-                classeId: selectedTurma,
-                data: selectedData !== "Selecione" ? selectedData : undefined,
-            });
+        let startDate: string | undefined = undefined;
+        let endDate: string | undefined = undefined;
+
+        if (selectedData !== "Selecione") {
+            startDate = `${selectedData}-01`;
+            const [year, month] = selectedData.split("-");
+            const lastDay = new Date(Number(year), Number(month), 0).getDate();
+            endDate = `${selectedData}-${lastDay}`;
         }
+
+        fetchRelatorios({ classeId: selectedTurma, startDate, endDate });
     }, [selectedTurma, selectedData]);
 
     const onPressRelatorio = (relatorioId: number) => {
         navigation.navigate('DetalhesRelatorio', { relatorioId });
     };
     
-    const sortedRelatorios = relatorios.sort((a, b) => b.relatorioId - a.relatorioId);
-
+    const sortedRelatorios = relatorios.sort((a, b) => Number(b.relatorioId) - Number(a.relatorioId));
+    
     return (
         <View style={styles.container}>
             <View>
@@ -84,19 +88,12 @@ export function Relatorios() {
                     onValueChange={(itemValue) => setSelectedData(itemValue)}
                 >
                     <Picker.Item label="Selecione" value="Selecione" />
-                    <Picker.Item label="Janeiro" value="2024-01-01" />
-                    <Picker.Item label="Fevereiro" value="2024-02-01" />
-                    <Picker.Item label="Março" value="2024-03-01" />
-                    <Picker.Item label="Abril" value="2024-04-01" />
-                    <Picker.Item label="Maio" value="2024-05-01" />
-                    <Picker.Item label="Junho" value="2024-06-01" />
-                    <Picker.Item label="Julho" value="2024-07-01" />
-                    <Picker.Item label="Agosto" value="2024-08-01" />
-                    <Picker.Item label="Setembro" value="2024-09-01" />
-                    <Picker.Item label="Outubro" value="2024-10-01" />
-                    <Picker.Item label="Novembro" value="2024-11-01" />
-                    <Picker.Item label="Dezembro" value="2024-12-01" />
-                    
+                    {[...Array(12)].map((_, index) => {
+                        const month = (index + 1).toString().padStart(2, "0");
+                        return (
+                            <Picker.Item key={month} label={new Date(2024, index).toLocaleString('pt-BR', { month: 'long' })} value={`2024-${month}`} />
+                        );
+                    })}
                 </Picker>
             </View>
 

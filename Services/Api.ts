@@ -2,7 +2,7 @@ import axios, { AxiosInstance, InternalAxiosRequestConfig, AxiosResponse } from 
 
 
 const axiosConfig = {
-  baseURL: 'https://web-app-controle-presenca-gsamegdaesaxdkd9.brazilsouth-01.azurewebsites.net/',
+  baseURL: 'http://192.168.1.2:5000/',
   headers: {
     'Content-Type': 'application/json',
   },
