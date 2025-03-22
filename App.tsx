@@ -9,6 +9,8 @@ import { createStackNavigator } from '@react-navigation/stack';
 import { setTopLevelNavigator } from './Services/NavigationServices';
 import { DetalhesRelatorio } from './Screens/Relatorio/DetalhesRelatorio';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { CadastrarTurma } from './Screens/CadastrarTurma/CadastrarTurma';
+
 
 export type RootStackParamList = {
   Turma: undefined;
@@ -17,6 +19,7 @@ export type RootStackParamList = {
   CadastrarRelatorio: { turmaId: number };
   CadastrarPessoa: undefined;
   DetalhesRelatorio: { relatorioId: number };
+  CadastrarTurma: undefined;
 };
 
 const Stack = createStackNavigator<RootStackParamList>();
@@ -49,6 +52,10 @@ export default function App() {
           <Stack.Screen
             name="CadastrarPessoa"
             component={CadastrarPessoa}
+          />
+          <Stack.Screen
+            name="CadastrarTurma"
+            component={CadastrarTurma}
           />
           <Stack.Screen
             name="DetalhesRelatorio"

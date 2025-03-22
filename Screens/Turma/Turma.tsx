@@ -20,58 +20,52 @@ export interface Turma {
 export function Turma() {  
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
   
-  
   const [turma, setTurma] = useState<Turma[]>([]);
 
   const btnRelatorios = async () => {
-   
-      navigation.navigate('Relatorios');
+    navigation.navigate('Relatorios');
   };
 
   const btnPessoas = async () => {
-   
     navigation.navigate('CadastrarPessoa');
-};
-
-useEffect(() => {
-
-  const handleBuscaTurmas = async () => {
-    try {
-
-      const response: GetTurmaResponse = await buscaTurmas();
-      const formattedTurma: Turma[] = response.map((turma) => ({
-        id: turma.id,
-        nome: turma.nome,
-      
-    }));
-    setTurma(formattedTurma);
-
-    } catch (error) {
-        
-    }
   };
-  
 
-  handleBuscaTurmas();
-}, []);
+  const btnCadastroTurma = async () => {
+    navigation.navigate('CadastrarTurma');
+  };
 
+  useEffect(() => {
+    const handleBuscaTurmas = async () => {
+      try {
+        const response: GetTurmaResponse = await buscaTurmas();
+        const formattedTurma: Turma[] = response.map((turma) => ({
+          id: turma.id,
+          nome: turma.nome,
+        }));
+        setTurma(formattedTurma);
+      } catch (error) {
+        console.error('Erro ao buscar turmas:', error);
+      }
+    };
+
+    handleBuscaTurmas();
+  }, []);
 
   return (
     <View style={styles.container}>
-        <ContentTurmaList data={turma} />
+      <ContentTurmaList data={turma} />
 
-        <TouchableOpacity
-            style={styles.button}
-            onPress={() => btnRelatorios()}
-          >
-            <Text style={styles.buttonText}>Relatórios</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.button}
-            onPress={() => btnPessoas()}
-          >
-            <Text style={styles.buttonText}>Cadastrar Pessoa</Text>
-          </TouchableOpacity>
+      <TouchableOpacity style={styles.button} onPress={btnRelatorios}>
+        <Text style={styles.buttonText}>Relatórios</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity style={styles.button} onPress={btnPessoas}>
+        <Text style={styles.buttonText}>Cadastrar Pessoa</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity style={styles.button} onPress={btnCadastroTurma}>
+        <Text style={styles.buttonText}>Cadastrar Turma</Text>
+      </TouchableOpacity>
     </View>
   );
 }

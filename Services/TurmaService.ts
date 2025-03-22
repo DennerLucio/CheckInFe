@@ -9,6 +9,11 @@ export interface TurmaResponse {
    
 }
 
+export interface CriarClasseRequest {
+  nome: string;
+}
+
+
 export interface Aluno {
     alunoId: number;
     nome: string;
@@ -47,6 +52,26 @@ export const buscaAluno = async (
       return response.data;
     } catch (error) {
       console.error('Erro ao buscar aluno:', error);
+      throw error;
+    }
+  };
+
+  export const cadastrarClasse = async (nome: string): Promise<ClasseResponse> => {
+    try {
+      const response = await api.post<ClasseResponse>('/api/classe', { nome });
+      return response.data;
+    } catch (error) {
+      console.error('Erro ao cadastrar classe:', error);
+      throw error;
+    }
+  };
+  
+  export const excluirClasse = async (id: number): Promise<void> => {
+    try {
+      await api.delete(`/api/classe/${id}`);
+      console.log(`Classe com ID ${id} deletada com sucesso.`);
+    } catch (error) {
+      console.error('Erro ao deletar classe:', error);
       throw error;
     }
   };

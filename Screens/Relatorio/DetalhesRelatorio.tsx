@@ -93,7 +93,7 @@ export function DetalhesRelatorio({ route }: DetalhesRelatorioProps) {
       </View>
 
       {/* Botão para gerar o relatório em planilha */}
-      <Button title="Gerar Relatório em Planilha" onPress={handleGerarRelatorio} />
+      <Button title="Compartilhar Relatório em Planilha" onPress={handleGerarRelatorio} />
 
       {/* Botão para baixar o relatório diretamente */}
       <Button title="Baixar Relatório" onPress={handleBaixarRelatorio} />
