@@ -54,17 +54,20 @@ export function Relatorios() {
   }, []);
 
   useEffect(() => {
-    let startDate: string | undefined = undefined;
-    let endDate: string | undefined = undefined;
+    let params: { classeId?: number; startDate?: string; endDate?: string } = {};
 
     if (selectedData !== "Selecione") {
-      startDate = `${selectedData}-01`;
       const [year, month] = selectedData.split("-");
       const lastDay = new Date(Number(year), Number(month), 0).getDate();
-      endDate = `${selectedData}-${lastDay}`;
+      params.startDate = `${selectedData}-01`;
+      params.endDate = `${selectedData}-${lastDay}`;
     }
 
-    fetchRelatorios({ classeId: selectedTurma, startDate, endDate });
+    if (selectedTurma !== undefined) {
+      params.classeId = selectedTurma;
+    }
+
+    fetchRelatorios(params);
   }, [selectedTurma, selectedData]);
 
   const onPressRelatorio = (relatorioId: number) => {
@@ -88,7 +91,7 @@ export function Relatorios() {
               <Picker
                 selectedValue={selectedTurma}
                 style={styles.picker}
-                onValueChange={(itemValue) => setSelectedTurma(Number(itemValue))}
+                onValueChange={(itemValue) => setSelectedTurma(itemValue === undefined ? undefined : Number(itemValue))}
               >
                 <Picker.Item label="Todas" value={undefined} />
                 {turmas.map((turma) => (
