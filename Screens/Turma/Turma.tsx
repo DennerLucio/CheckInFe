@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useCallback } from "react";
 import {
   Text,
   TouchableOpacity,
@@ -6,9 +6,9 @@ import {
   SafeAreaView,
   StatusBar
 } from "react-native";
+import { useFocusEffect, useNavigation, NavigationProp } from '@react-navigation/native';
 import styles from "../Turma/StyleTurma";
 import { ContentTurmaList } from '../Card/TurmaList';
-import { useNavigation, NavigationProp } from '@react-navigation/native';
 import { RootStackParamList } from '../../App';
 import { buscaTurmas, GetTurmaResponse } from '../../Services/TurmaService';
 
@@ -21,34 +21,24 @@ export function Turma() {
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
   const [turma, setTurma] = useState<Turma[]>([]);
 
-  const btnRelatorios = () => {
-    navigation.navigate('Relatorios');
-  };
+  useFocusEffect(
+    useCallback(() => {
+      const handleBuscaTurmas = async () => {
+        try {
+          const response: GetTurmaResponse = await buscaTurmas();
+          const formattedTurma: Turma[] = response.map((turma) => ({
+            id: turma.id,
+            nome: turma.nome,
+          }));
+          setTurma(formattedTurma);
+        } catch (error) {
+          console.error('Erro ao buscar turmas:', error);
+        }
+      };
 
-  const btnPessoas = () => {
-    navigation.navigate('CadastrarPessoa');
-  };
-
-  const btnCadastroTurma = () => {
-    navigation.navigate('CadastrarTurma');
-  };
-
-  useEffect(() => {
-    const handleBuscaTurmas = async () => {
-      try {
-        const response: GetTurmaResponse = await buscaTurmas();
-        const formattedTurma: Turma[] = response.map((turma) => ({
-          id: turma.id,
-          nome: turma.nome,
-        }));
-        setTurma(formattedTurma);
-      } catch (error) {
-        console.error('Erro ao buscar turmas:', error);
-      }
-    };
-
-    handleBuscaTurmas();
-  }, []);
+      handleBuscaTurmas();
+    }, [])
+  );
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -66,7 +56,7 @@ export function Turma() {
       <View style={styles.footer}>
         <TouchableOpacity 
           style={[styles.button, styles.reportButton]} 
-          onPress={btnRelatorios}
+          onPress={() => navigation.navigate('Relatorios')}
         >
           <Text style={styles.buttonText}>Relatórios</Text>
         </TouchableOpacity>
@@ -74,14 +64,14 @@ export function Turma() {
         <View style={styles.buttonRow}>
           <TouchableOpacity 
             style={[styles.button, styles.secondaryButton]} 
-            onPress={btnPessoas}
+            onPress={() => navigation.navigate('CadastrarPessoa')}
           >
             <Text style={styles.buttonText}>Cadastrar Pessoa</Text>
           </TouchableOpacity>
 
           <TouchableOpacity 
             style={[styles.button, styles.secondaryButton]} 
-            onPress={btnCadastroTurma}
+            onPress={() => navigation.navigate('CadastrarTurma')}
           >
             <Text style={styles.buttonText}>Cadastrar Turma</Text>
           </TouchableOpacity>
