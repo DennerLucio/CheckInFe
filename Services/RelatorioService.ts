@@ -20,6 +20,7 @@ export interface RelatorioResponse {
   id: number;
   data: string;
   observacao: string;
+  professor: string;
   oferta: number;
   presentes: number;
   quantidadeBiblias: number;

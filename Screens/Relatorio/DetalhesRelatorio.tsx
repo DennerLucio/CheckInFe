@@ -86,6 +86,7 @@ export function DetalhesRelatorio({ route }: DetalhesRelatorioProps) {
       <Text style={styles.title}>Detalhes do Relatório</Text>
       <View style={styles.card}>
         <Text style={styles.label}>📅 Data: {formatarData(relatorio.data)}</Text>
+        <Text style={styles.label}>👨‍🏫 Professor: {relatorio.professor ?? 'Não informado'}</Text>
         <Text style={styles.label}>📖 Quantidade de Bíblias: {relatorio.quantidadeBiblias}</Text>
         <Text style={styles.label}>💰 Oferta: {relatorio.oferta}</Text>
         <Text style={styles.label}>👥 Presentes: {relatorio.presentes}</Text>
