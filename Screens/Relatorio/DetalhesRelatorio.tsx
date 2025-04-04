@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, StyleSheet, ActivityIndicator, Button, Alert } from "react-native";
+import { View, Text, StyleSheet, ActivityIndicator, TouchableOpacity, Alert } from "react-native";
 import { infoRelatorio, RelatorioResponse } from "../../Services/RelatorioService";
 import { RouteProp } from "@react-navigation/native";
 import { RootStackParamList } from "../../App";
-import { compartilharRelatorioPlanilha, baixarRelatorioPlanilha } from "../../Services/RelatorioService"; // Importe a função de download
+import { compartilharRelatorioPlanilha, baixarRelatorioPlanilha } from "../../Services/RelatorioService";
 import { AxiosError } from 'axios';
 
 interface DetalhesRelatorioProps {
@@ -51,12 +51,12 @@ export function DetalhesRelatorio({ route }: DetalhesRelatorioProps) {
 
   const handleBaixarRelatorio = async () => {
     try {
-      await baixarRelatorioPlanilha(); // Chama a função de download do relatório
+      await baixarRelatorioPlanilha();
       Alert.alert("Sucesso", "Relatório baixado com sucesso!", [{ text: "OK" }]);
     } catch (error: unknown) {
       console.error('Erro ao baixar planilha:', error);
       if (error instanceof AxiosError && error.response) {
-        console.error('Resposta do erro:', error.response.data); // Exibe detalhes da resposta de erro
+        console.error('Resposta do erro:', error.response.data);
         setError('Erro ao baixar o relatório: ' + error.response.data);
       } else {
         setError('Não foi possível baixar a planilha. Tente novamente mais tarde.');
@@ -66,7 +66,7 @@ export function DetalhesRelatorio({ route }: DetalhesRelatorioProps) {
   };
 
   if (loading) {
-    return <ActivityIndicator size="large" color="#0000ff" />;
+    return <ActivityIndicator size="large" color="#6C5CE7" style={styles.loading} />;
   }
 
   if (error) {
@@ -78,50 +78,117 @@ export function DetalhesRelatorio({ route }: DetalhesRelatorioProps) {
   }
 
   if (!relatorio) {
-    return <Text>Nenhum relatório encontrado.</Text>;
+    return <Text style={styles.noData}>Nenhum relatório encontrado.</Text>;
   }
 
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Detalhes do Relatório</Text>
-      <View style={styles.container}>
-        <Text style={styles.label}>Data: {formatarData(relatorio.data)}</Text>
-        <Text style={styles.label}>Quantidade de Bíblias: {relatorio.quantidadeBiblias}</Text>
-        <Text style={styles.label}>Oferta: {relatorio.oferta}</Text>
-        <Text style={styles.label}>Presentes: {relatorio.presentes}</Text>
-        <Text style={styles.label}>Observação: {relatorio.observacao}</Text>
+      <View style={styles.card}>
+        <Text style={styles.label}>📅 Data: {formatarData(relatorio.data)}</Text>
+        <Text style={styles.label}>📖 Quantidade de Bíblias: {relatorio.quantidadeBiblias}</Text>
+        <Text style={styles.label}>💰 Oferta: {relatorio.oferta}</Text>
+        <Text style={styles.label}>👥 Presentes: {relatorio.presentes}</Text>
+        <Text style={styles.label}>📝 Observação: {relatorio.observacao}</Text>
       </View>
-
-      {/* Botão para gerar o relatório em planilha */}
-      <Button title="Compartilhar Relatório em Planilha" onPress={handleGerarRelatorio} />
-
-      {/* Botão para baixar o relatório diretamente */}
-      <Button title="Baixar Relatório" onPress={handleBaixarRelatorio} />
+      <TouchableOpacity style={styles.button} onPress={handleGerarRelatorio}>
+        <Text style={styles.buttonText}>Compartilhar Relatório</Text>
+      </TouchableOpacity>
+      <TouchableOpacity style={[styles.button, styles.downloadButton]} onPress={handleBaixarRelatorio}>
+        <Text style={styles.buttonText}>Baixar Relatório</Text>
+      </TouchableOpacity>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    padding: 25,
-  },
-  label: {
-    fontSize: 18,
+    flex: 1,
+    backgroundColor: "#F5F7FF",
+    padding: 20,
   },
   title: {
     fontSize: 24,
     fontWeight: "bold",
-    marginBottom: 10,
+    color: "#333B69",
+    marginBottom: 20,
+    marginTop: 10,
+  },
+  card: {
+    backgroundColor: "#FFFFFF",
+    borderRadius: 12,
+    padding: 20,
+    marginBottom: 20,
+    elevation: 2,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+  },
+  label: {
+    fontSize: 16,
+    color: "#333B69",
+    marginBottom: 16,
+    fontWeight: "500",
+  },
+  button: {
+    backgroundColor: "#6C5CE7",
+    padding: 16,
+    borderRadius: 10,
+    alignItems: "center",
+    marginBottom: 16,
+    elevation: 2,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+  },
+  buttonText: {
+    color: "#FFFFFF",
+    fontSize: 16,
+    fontWeight: "600",
+  },
+  downloadButton: {
+    backgroundColor: "#7F7FD5",
   },
   errorContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
     padding: 20,
-    backgroundColor: "#f8d7da",
-    borderColor: "#f5c6cb",
-    borderWidth: 1,
-    borderRadius: 5,
+    backgroundColor: "#F5F7FF",
   },
   errorText: {
-    color: "#721c24",
+    color: "#FF6B6B",
     textAlign: "center",
+    fontSize: 16,
+    backgroundColor: "#FFFFFF",
+    padding: 20,
+    borderRadius: 12,
+    elevation: 2,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    width: "100%",
+  },
+  loading: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  noData: {
+    color: "#333B69",
+    textAlign: "center",
+    fontSize: 18,
+    padding: 20,
+    backgroundColor: "#FFFFFF",
+    margin: 20,
+    borderRadius: 12,
+    elevation: 2,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
   },
 });

@@ -2,7 +2,7 @@ import axios, { AxiosInstance, InternalAxiosRequestConfig, AxiosResponse } from 
 
 
 const axiosConfig = {
-  baseURL: 'http://192.168.1.2:5000/',
+  baseURL: 'http://192.168.56.1:5000/',
   headers: {
     'Content-Type': 'application/json',
   },

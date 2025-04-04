@@ -8,6 +8,9 @@ import {
   TouchableOpacity,
   Alert,
   ActivityIndicator,
+  ScrollView,
+  KeyboardAvoidingView,
+  Platform
 } from "react-native";
 import Checkbox from "expo-checkbox";
 import { Picker } from "@react-native-picker/picker";
@@ -32,15 +35,11 @@ export function CadastrarRelatorio() {
   const [biblias, setBiblias] = useState<string>("");
   const [revistas, setRevistas] = useState<string>("");
   const [obs, setObs] = useState<string>("");
-  const [selectedItems, setSelectedItems] = useState<Record<number, boolean>>(
-    {}
-  );
+  const [selectedItems, setSelectedItems] = useState<Record<number, boolean>>({});
   const [alunos, setAlunos] = useState<Item[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [professorId, setProfessorId] = useState<number | null>(null);
-  const [professores, setProfessores] = useState<
-    { id: number; nome: string }[]
-  >([]);
+  const [professores, setProfessores] = useState<{ id: number; nome: string }[]>([]);
 
   useEffect(() => {
     const fetchAlunosEProfessores = async () => {
@@ -54,7 +53,6 @@ export function CadastrarRelatorio() {
             name: aluno.nome,
           }))
         );
-
 
         const professoresResponse = await buscaProfessor();
         setProfessores(
@@ -141,113 +139,153 @@ export function CadastrarRelatorio() {
   };
 
   const renderItem: ListRenderItem<Item> = ({ item }) => (
-    <View style={styles.containerCheckbox}>
+    <View style={styles.studentItem}>
       <Checkbox
         style={styles.checkbox}
         value={!!selectedItems[item.alunoId]}
         onValueChange={() => toggleCheckbox(item.alunoId)}
-        color={selectedItems[item.alunoId] ? "#4630EB" : undefined}
+        color={selectedItems[item.alunoId] ? "#6C5CE7" : undefined}
       />
-      <Text style={styles.paragraph}>{item.name}</Text>
+      <Text style={styles.studentName}>{item.name}</Text>
     </View>
   );
 
   return (
-    <View style={styles.container}>
-      <View style={styles.form}>
-        <View style={styles.labelinputs}>
-          <Text style={styles.label}>Ofertas (R$):</Text>
-          <TextInput
-            style={styles.input}
-            keyboardType="numeric"
-            placeholder="Ex: 100.50"
-            value={oferta}
-            onChangeText={setOferta}
-          />
-        </View>
-        <View style={styles.labelinputs}>
-          <Text style={styles.label}>Visitantes:</Text>
-          <TextInput
-            style={styles.input}
-            keyboardType="numeric"
-            placeholder="Ex: 5"
-            value={visitantes}
-            onChangeText={setVisitantes}
-          />
-        </View>
-        <View style={styles.labelinputs}>
-          <Text style={styles.label}>Bíblias:</Text>
-          <TextInput
-            style={styles.input}
-            keyboardType="numeric"
-            placeholder="Ex: 3"
-            value={biblias}
-            onChangeText={setBiblias}
-          />
-        </View>
-        <View style={styles.labelinputs}>
-          <Text style={styles.label}>Revistas:</Text>
-          <TextInput
-            style={styles.input}
-            keyboardType="numeric"
-            placeholder="Ex: 2"
-            value={revistas}
-            onChangeText={setRevistas}
-          />
-        </View>
-        <View style={styles.labelinputs}>
-          <Text style={styles.label}>Professor:</Text>
-          <Picker
-            selectedValue={professorId}
-            style={styles.comboboxprofessorid}
-            onValueChange={(itemValue) => setProfessorId(itemValue)}
-          >
-            <Picker.Item label="Selecione" value={null} />
-            {professores.map((professor) => (
-              <Picker.Item
-                key={professor.id}
-                label={professor.nome}
-                value={professor.id}
-              />
-            ))}
-          </Picker>
-        </View>
-        <View style={styles.labelinputs}>
-          <Text style={styles.label}>Observações:</Text>
-          <TextInput
-            style={styles.observation}
-            placeholder="Digite observações adicionais"
-            multiline
-            numberOfLines={4}
-            value={obs}
-            onChangeText={setObs}
-          />
-        </View>
-      </View>
-
-      {alunos.length === 0 ? (
-        <Text>Nenhum aluno encontrado.</Text>
-      ) : (
-        <FlatList
-          data={alunos}
-          renderItem={renderItem}
-          style={styles.containerAlunos}
-          keyExtractor={(item) => item.alunoId.toString()}
-      
-        />
-      )}
-
-      <TouchableOpacity
-        style={styles.btnSubmit}
-        onPress={handleSubmit}
-        disabled={loading || alunos.length === 0}
+    <KeyboardAvoidingView 
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      style={styles.container}
+    >
+      <ScrollView 
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollViewContent}
+        showsVerticalScrollIndicator={false}
       >
-        {loading ? (
-          <ActivityIndicator color="#FFF" />
-        ) : (
-          <Text style={styles.btnSubmitText}>Enviar Relatório</Text>
-        )}
-      </TouchableOpacity>
-    </View>
+        <View style={styles.header}>
+          <Text style={styles.headerTitle}>Cadastrar Relatório</Text>
+          <Text style={styles.headerSubtitle}>Preencha os dados da aula</Text>
+        </View>
+
+        <View style={styles.formCard}>
+          <View style={styles.formSection}>
+            <Text style={styles.sectionTitle}>Informações Gerais</Text>
+            
+            <View style={styles.inputGroup}>
+              <Text style={styles.label}>Ofertas (R$):</Text>
+              <TextInput
+                style={styles.input}
+                keyboardType="numeric"
+                placeholder="Ex: 100.50"
+                value={oferta}
+                onChangeText={setOferta}
+                placeholderTextColor="#8A94A6"
+              />
+            </View>
+            
+            <View style={styles.inputGroup}>
+              <Text style={styles.label}>Visitantes:</Text>
+              <TextInput
+                style={styles.input}
+                keyboardType="numeric"
+                placeholder="Ex: 5"
+                value={visitantes}
+                onChangeText={setVisitantes}
+                placeholderTextColor="#8A94A6"
+              />
+            </View>
+            
+            <View style={styles.inputGroup}>
+              <Text style={styles.label}>Bíblias:</Text>
+              <TextInput
+                style={styles.input}
+                keyboardType="numeric"
+                placeholder="Ex: 3"
+                value={biblias}
+                onChangeText={setBiblias}
+                placeholderTextColor="#8A94A6"
+              />
+            </View>
+            
+            <View style={styles.inputGroup}>
+              <Text style={styles.label}>Revistas:</Text>
+              <TextInput
+                style={styles.input}
+                keyboardType="numeric"
+                placeholder="Ex: 2"
+                value={revistas}
+                onChangeText={setRevistas}
+                placeholderTextColor="#8A94A6"
+              />
+            </View>
+            
+            <View style={styles.inputGroup}>
+              <Text style={styles.label}>Professor:</Text>
+              <View style={styles.pickerContainer}>
+                <Picker
+                  selectedValue={professorId}
+                  style={styles.picker}
+                  onValueChange={(itemValue) => setProfessorId(itemValue)}
+                >
+                  <Picker.Item label="Selecione" value={null} />
+                  {professores.map((professor) => (
+                    <Picker.Item
+                      key={professor.id}
+                      label={professor.nome}
+                      value={professor.id}
+                    />
+                  ))}
+                </Picker>
+              </View>
+            </View>
+            
+            <View style={styles.inputGroup}>
+              <Text style={styles.label}>Observações:</Text>
+              <TextInput
+                style={styles.textArea}
+                placeholder="Digite observações adicionais"
+                multiline
+                numberOfLines={4}
+                value={obs}
+                onChangeText={setObs}
+                placeholderTextColor="#8A94A6"
+                textAlignVertical="top"
+              />
+            </View>
+          </View>
+        </View>
+
+        <View style={styles.studentsCard}>
+          <Text style={styles.sectionTitle}>Alunos Presentes</Text>
+          
+          {alunos.length === 0 ? (
+            <View style={styles.emptyState}>
+              <Text style={styles.emptyStateText}>Nenhum aluno encontrado.</Text>
+            </View>
+          ) : (
+            <FlatList
+              data={alunos}
+              renderItem={renderItem}
+              keyExtractor={(item) => item.alunoId.toString()}
+              style={styles.studentsList}
+              scrollEnabled={false}
+            />
+          )}
+        </View>
+
+        <TouchableOpacity
+          style={[
+            styles.submitButton,
+            (loading || alunos.length === 0) && styles.disabledButton
+          ]}
+          onPress={handleSubmit}
+          disabled={loading || alunos.length === 0}
+        >
+          {loading ? (
+            <ActivityIndicator color="#FFF" />
+          ) : (
+            <Text style={styles.submitButtonText}>Enviar Relatório</Text>
+          )}
+        </TouchableOpacity>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }

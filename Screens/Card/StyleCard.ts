@@ -1,55 +1,65 @@
-import {StyleSheet } from 'react-native'
+import { StyleSheet } from 'react-native';
 
 const styles = StyleSheet.create({
-    container: {
-      height:75,
-      backgroundColor: '#EFEFEF',
-      width: '90%',
-      borderRadius:12,
-      flexDirection:'row',
-      justifyContent:'center',
-      alignItems:'center',
-      marginBottom:15,
-      elevation: 5,
-      alignSelf: 'center',
-    },
-    txtTituloTurma:{
-      height:'100%',
-      width:'100%',
-      textAlign:'center',
-      textAlignVertical:'center',
-      fontSize:22,
-      fontWeight:'500',
-      color:'#3B73BD'
-    },
-    
-    ContainerNumTurma:{
-      width:'40%',
-      height:'100%',
-      justifyContent:'center',
-      alignItems:'center',
-      
-    },
-    txtNumTurma:{
-      fontSize:24,
-      width:'100%',
-      height:'100%',
-      textAlign:'right',
-      textAlignVertical:'center',
-      paddingRight:10,
-      color:'#3B73BD'
-    },
-   
-    list: {
-      flexGrow: 1,
-      width: '100%',
+  listContainer: {
+    flex: 1,
+    width: '100%',
+    backgroundColor: '#F5F7FF',
+  },
+  cardWrapper: {
+    width: '90%',
+    marginBottom: 16,
+    borderRadius: 16,
+    overflow: 'hidden',
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+  },
+  container: {
+    height: 100,
+    width: '100%',
+    borderRadius: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 16,
+  },
+  iconContainer: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    backgroundColor: 'rgba(255, 255, 255, 0.25)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 16,
+  },
+  iconText: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#FFFFFF',
+  },
+  contentContainer: {
+    flex: 1,
+    justifyContent: 'center',
+  },
+  txtTituloTurma: {
+    fontSize: 20,
+    fontWeight: '600',
+    color: '#FFFFFF',
+    marginBottom: 4,
+  },
+  subtitleText: {
+    fontSize: 14,
+    color: 'rgba(255, 255, 255, 0.8)',
+  },
+  list: {
+    flexGrow: 1,
+    width: '100%',
   },
   listContent: {
-      flexGrow: 1,
-      justifyContent: 'center',
-      alignItems: 'center',
-      paddingBottom: 20,
-    
+    paddingVertical: 16,
+    alignItems: 'center',
   },
 });
 

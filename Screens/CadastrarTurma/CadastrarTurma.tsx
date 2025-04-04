@@ -1,18 +1,24 @@
 import React, { useState, useEffect } from "react";
-import { Text, TextInput, TouchableOpacity, View, Alert, ActivityIndicator } from "react-native";
+import { 
+  Text, 
+  TextInput, 
+  TouchableOpacity, 
+  View, 
+  Alert, 
+  ActivityIndicator 
+} from "react-native";
 import { cadastrarClasse, excluirClasse, buscaTurmas } from "../../Services/TurmaService";
 import { useNavigation, NavigationProp } from "@react-navigation/native";
 import { RootStackParamList } from "../../App";
-import { Picker } from "@react-native-picker/picker"; // Importar o Picker para o dropdown
+import { Picker } from "@react-native-picker/picker";
 import styles from "../CadastrarTurma/StyleCadastrarTurma";
-
 
 export function CadastrarTurma() {
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
   const [nome, setNome] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
   const [turmas, setTurmas] = useState<{ id: number; nome: string }[]>([]);
-  const [turmaSelecionada, setTurmaSelecionada] = useState<number | undefined>(undefined); // Variável para turma selecionada para exclusão
+  const [turmaSelecionada, setTurmaSelecionada] = useState<number | undefined>(undefined);
 
   const btnCadastrar = async () => {
     if (!nome.trim()) {
@@ -24,8 +30,8 @@ export function CadastrarTurma() {
     try {
       await cadastrarClasse(nome);
       Alert.alert("Sucesso", "Turma cadastrada com sucesso!");
-      setNome(""); // Limpa o campo de nome
-      carregarTurmas(); // Atualiza a lista de turmas
+      setNome("");
+      carregarTurmas();
     } catch (error) {
       Alert.alert("Erro", "Não foi possível cadastrar a turma.");
     } finally {
@@ -33,7 +39,6 @@ export function CadastrarTurma() {
     }
   };
 
-  // Função para excluir uma turma
   const btnExcluir = async () => {
     if (turmaSelecionada === undefined) {
       Alert.alert("Erro", "Selecione uma turma para excluir.");
@@ -44,8 +49,8 @@ export function CadastrarTurma() {
     try {
       await excluirClasse(turmaSelecionada);
       Alert.alert("Sucesso", "Turma excluída com sucesso!");
-      setTurmaSelecionada(undefined); // Limpa a seleção
-      carregarTurmas(); // Atualiza a lista de turmas
+      setTurmaSelecionada(undefined);
+      carregarTurmas();
     } catch (error) {
       Alert.alert("Erro", "Não foi possível excluir a turma.");
     } finally {
@@ -53,7 +58,6 @@ export function CadastrarTurma() {
     }
   };
 
-  // Função para carregar as turmas
   const carregarTurmas = async () => {
     try {
       const response = await buscaTurmas();
@@ -67,42 +71,70 @@ export function CadastrarTurma() {
     }
   };
 
-  // Carrega as turmas quando o componente é montado
   useEffect(() => {
     carregarTurmas();
   }, []);
 
   return (
     <View style={styles.container}>
-      <Text style={styles.textTitulo}>Cadastrar Nova Turma</Text>
+      <View style={styles.card}>
+        <Text style={styles.textTitulo}>Cadastrar Nova Turma</Text>
+        
+        <View style={styles.inputContainer}>
+          <Text style={styles.inputLabel}>Nome da Turma</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Digite o nome da turma"
+            placeholderTextColor="#8A94A6"
+            value={nome}
+            onChangeText={setNome}
+          />
+        </View>
 
-      <TextInput
-        style={styles.input}
-        placeholder="Nome da Turma"
-        value={nome}
-        onChangeText={setNome}
-      />
+        <TouchableOpacity 
+          style={[styles.button, styles.primaryButton]} 
+          onPress={btnCadastrar} 
+          disabled={loading}
+        >
+          {loading ? (
+            <ActivityIndicator color="#fff" />
+          ) : (
+            <Text style={styles.buttonText}>Cadastrar</Text>
+          )}
+        </TouchableOpacity>
+      </View>
 
-      <TouchableOpacity style={styles.button} onPress={btnCadastrar} disabled={loading}>
-        {loading ? <ActivityIndicator color="#fff" /> : <Text style={styles.buttonText}>Cadastrar</Text>}
-      </TouchableOpacity>
+      <View style={styles.card}>
+        <Text style={styles.textTitulo}>Excluir Turma</Text>
+        
+        <View style={styles.inputContainer}>
+          <Text style={styles.inputLabel}>Selecione a Turma</Text>
+          <View style={styles.pickerContainer}>
+            <Picker
+              selectedValue={turmaSelecionada}
+              onValueChange={(itemValue) => setTurmaSelecionada(itemValue)}
+              style={styles.picker}
+            >
+              <Picker.Item label="Selecione uma turma" value={undefined} />
+              {turmas.map((turma) => (
+                <Picker.Item key={turma.id} label={turma.nome} value={turma.id} />
+              ))}
+            </Picker>
+          </View>
+        </View>
 
-      <Text style={styles.textTitulo}>Excluir Turma</Text>
-
-      <Picker
-        selectedValue={turmaSelecionada}
-        onValueChange={(itemValue) => setTurmaSelecionada(itemValue)}
-        style={styles.picker}
-      >
-        <Picker.Item label="Selecione uma turma" value={undefined} />
-        {turmas.map((turma) => (
-          <Picker.Item key={turma.id} label={turma.nome} value={turma.id} />
-        ))}
-      </Picker>
-
-      <TouchableOpacity style={styles.button} onPress={btnExcluir} disabled={loading}>
-        {loading ? <ActivityIndicator color="#fff" /> : <Text style={styles.buttonText}>Excluir Turma</Text>}
-      </TouchableOpacity>
+        <TouchableOpacity 
+          style={[styles.button, styles.dangerButton]} 
+          onPress={btnExcluir} 
+          disabled={loading}
+        >
+          {loading ? (
+            <ActivityIndicator color="#fff" />
+          ) : (
+            <Text style={styles.buttonText}>Excluir Turma</Text>
+          )}
+        </TouchableOpacity>
+      </View>
     </View>
   );
 }

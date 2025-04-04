@@ -2,6 +2,7 @@ import React from "react";
 import { Text, View } from "react-native";
 import styles from './StyleCardRelatorio';
 import { ListaRelatorioResponse } from "../../Services/RelatorioService";
+
 interface CardRelatorioProps {
   relatorio: ListaRelatorioResponse;
 }
@@ -24,12 +25,17 @@ export function CardRelatorio({ relatorio }: CardRelatorioProps) {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.txtDtRelatorio}>{dataFormatada}</Text>
-
-      {relatorio.nomeClasse && (
-        <Text style={styles.txtObservacao}>{relatorio.nomeClasse}</Text>
-      )}
-     
+      <View style={styles.contentContainer}>
+        <Text style={styles.dateText}>{dataFormatada}</Text>
+        
+        {relatorio.nomeClasse && (
+          <Text style={styles.classText}>{relatorio.nomeClasse}</Text>
+        )}
+        
+        {relatorio.quantidadePresentes != null && (
+          <Text style={styles.presencesText}>{presencasText}</Text>
+        )}
+      </View>
     </View>
   );
 }
