@@ -29,7 +29,7 @@ export function Login() {
       const response = await login(email, password);
 
       if (response.success) {
-        navigation.navigate("Turma");
+        navigation.navigate("MainTabs");
       }
       else{
         Alert.alert("Erro de Login", "Usuário ou senha incorretos");

@@ -52,31 +52,6 @@ export function Turma() {
       <View style={styles.container}>
         <ContentTurmaList data={turma} />
       </View>
-      
-      <View style={styles.footer}>
-        <TouchableOpacity 
-          style={[styles.button, styles.reportButton]} 
-          onPress={() => navigation.navigate('Relatorios')}
-        >
-          <Text style={styles.buttonText}>Relatórios</Text>
-        </TouchableOpacity>
-
-        <View style={styles.buttonRow}>
-          <TouchableOpacity 
-            style={[styles.button, styles.secondaryButton]} 
-            onPress={() => navigation.navigate('CadastrarPessoa')}
-          >
-            <Text style={styles.buttonText}>Cadastrar Pessoa</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity 
-            style={[styles.button, styles.secondaryButton]} 
-            onPress={() => navigation.navigate('CadastrarTurma')}
-          >
-            <Text style={styles.buttonText}>Cadastrar Turma</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
     </SafeAreaView>
   );
 }

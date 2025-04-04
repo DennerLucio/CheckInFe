@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet } from 'react-native';
 import { Login } from './Screens/Login/Login';
 import { Turma } from './Screens/Turma/Turma';
 import { Relatorios } from './Screens/Relatorio/Relatorios';
@@ -6,24 +6,89 @@ import { CadastrarRelatorio } from './Screens/CadastrarRelatorio/CadastrarRelato
 import { CadastrarPessoa } from './Screens/CadastrarPessoa/CadastrarPessoa';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { setTopLevelNavigator } from './Services/NavigationServices';
 import { DetalhesRelatorio } from './Screens/Relatorio/DetalhesRelatorio';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { CadastrarTurma } from './Screens/CadastrarTurma/CadastrarTurma';
+import { Home, Users, FileText, PlusCircle } from 'react-native-feather';
 
-
+// Definição dos tipos para navegação
 export type RootStackParamList = {
+  Login: undefined;
+  MainTabs: undefined;
+  CadastrarRelatorio: { turmaId: number };
+  DetalhesRelatorio: { relatorioId: number };
+};
+
+export type MainTabParamList = {
   Turma: undefined;
   Relatorios: undefined;
-  Login: undefined;
-  CadastrarRelatorio: { turmaId: number };
   CadastrarPessoa: undefined;
-  DetalhesRelatorio: { relatorioId: number };
   CadastrarTurma: undefined;
 };
 
+// Criação dos navegadores
 const Stack = createStackNavigator<RootStackParamList>();
+const Tab = createBottomTabNavigator<MainTabParamList>();
 
+// Componente de navegação em abas
+function MainTabs() {
+  return (
+    <Tab.Navigator
+      screenOptions={{
+        tabBarStyle: styles.tabBar,
+        tabBarActiveTintColor: '#6C5CE7',
+        tabBarInactiveTintColor: '#8A94A6',
+        tabBarLabelStyle: styles.tabLabel,
+        headerShown: false,
+      }}
+    >
+      <Tab.Screen 
+        name="Turma" 
+        component={Turma} 
+        options={{
+          tabBarLabel: 'Turmas',
+          tabBarIcon: ({ color, size }) => (
+            <Home width={22} height={22} color={color} />
+          ),
+        }}
+      />
+      <Tab.Screen 
+        name="Relatorios" 
+        component={Relatorios} 
+        options={{
+          tabBarLabel: 'Relatórios',
+          tabBarIcon: ({ color, size }) => (
+            <FileText width={22} height={22} color={color} />
+          ),
+        }}
+      />
+      <Tab.Screen 
+        name="CadastrarPessoa" 
+        component={CadastrarPessoa} 
+        options={{
+          tabBarLabel: 'Pessoas',
+          tabBarIcon: ({ color, size }) => (
+            <Users width={22} height={22} color={color} />
+          ),
+        }}
+      />
+      <Tab.Screen 
+        name="CadastrarTurma" 
+        component={CadastrarTurma} 
+        options={{
+          tabBarLabel: 'Cadastrar',
+          tabBarIcon: ({ color, size }) => (
+            <PlusCircle width={22} height={22} color={color} />
+          ),
+        }}
+      />
+    </Tab.Navigator>
+  );
+}
+
+// Componente principal do App
 export default function App() {
   return (
     <SafeAreaProvider> 
@@ -32,45 +97,22 @@ export default function App() {
           initialRouteName="Login"
           screenOptions={{
             headerShown: false,
-            headerStyle: {
-              backgroundColor: '#3B73BD',
-            },
-            headerTintColor: '#FFFFFF',
           }}>
           <Stack.Screen
-            name="Turma"
-            component={Turma}
+            name="Login"
+            component={Login}
           />
           <Stack.Screen
-            name="Relatorios"
-            component={Relatorios}
+            name="MainTabs"
+            component={MainTabs}
           />
           <Stack.Screen
             name="CadastrarRelatorio"
             component={CadastrarRelatorio}
           />
           <Stack.Screen
-            name="CadastrarPessoa"
-            component={CadastrarPessoa}
-          />
-          <Stack.Screen
-            name="CadastrarTurma"
-            component={CadastrarTurma}
-          />
-          <Stack.Screen
             name="DetalhesRelatorio"
             component={DetalhesRelatorio}
-          />
-          <Stack.Screen
-            name="Login"
-            component={Login}
-            options={{
-              headerShown: false,
-              headerStyle: {
-                backgroundColor: '#B1464A',
-              },
-              headerTintColor: '#FFFFFF',
-            }}
           />
         </Stack.Navigator>
       </NavigationContainer>
@@ -79,10 +121,20 @@ export default function App() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
+  tabBar: {
+    backgroundColor: '#FFFFFF',
+    borderTopWidth: 1,
+    borderTopColor: '#E1E5F2',
+    height: 60,
+    elevation: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: -2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+  },
+  tabLabel: {
+    fontSize: 12,
+    fontWeight: '500',
+    marginBottom: 4,
   },
 });
