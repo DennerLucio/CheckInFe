@@ -44,7 +44,7 @@ export function CadastrarRelatorio() {
   useEffect(() => {
     const fetchAlunosEProfessores = async () => {
       try {
-        const alunosResponse = await buscaAluno(turmaId, 1, 10); 
+        const alunosResponse = await buscaAluno(turmaId, 1, 100); 
         const alunosData = alunosResponse.flatMap((classe) => classe.alunos);
 
         setAlunos(
@@ -81,48 +81,51 @@ export function CadastrarRelatorio() {
   };
 
   const handleSubmit = async () => {
-    if (!oferta || !visitantes || !biblias || !revistas || !professorId) {
-      Alert.alert(
-        "Campos obrigatórios",
-        "Por favor, preencha todos os campos obrigatórios."
-      );
+    if (!professorId) {
+      Alert.alert("Campos obrigatórios", "Por favor, selecione o professor.");
       return;
     }
-
+  
+    const ofertaValue = oferta.trim() === "" ? 0 : parseFloat(oferta);
+    const visitantesValue = visitantes.trim() === "" ? 0 : parseInt(visitantes);
+    const bibliasValue = biblias.trim() === "" ? 0 : parseInt(biblias);
+    const revistasValue = revistas.trim() === "" ? 0 : parseInt(revistas);
+  
     if (
-      isNaN(parseFloat(oferta)) ||
-      isNaN(parseInt(visitantes)) ||
-      isNaN(parseInt(biblias)) ||
-      isNaN(parseInt(revistas))
+      isNaN(ofertaValue) ||
+      isNaN(visitantesValue) ||
+      isNaN(bibliasValue) ||
+      isNaN(revistasValue)
     ) {
       Alert.alert("Erro", "Por favor, insira valores numéricos válidos.");
       return;
     }
-
+  
     const alunosPresentesIds = alunos
       .filter((aluno) => selectedItems[aluno.alunoId])
       .map((aluno) => aluno.alunoId);
-
+  
     if (alunosPresentesIds.length === 0) {
       Alert.alert("Erro", "Selecione pelo menos um aluno presente.");
       return;
     }
-
+  
     setLoading(true);
-
+  
     try {
       await cadastrarRelatorio(
         obs,
-        parseFloat(oferta),
+        ofertaValue,
         professorId,
-        parseInt(biblias),
-        parseInt(revistas),
-        parseInt(visitantes),
+        bibliasValue,
+        revistasValue,
+        visitantesValue,
         turmaId,
         alunosPresentesIds
       );
+  
       Alert.alert("Sucesso", "Relatório cadastrado com sucesso");
-
+  
       setOferta("");
       setVisitantes("");
       setBiblias("");

@@ -150,7 +150,7 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   },
   downloadButton: {
-    backgroundColor: "#7F7FD5",
+    backgroundColor: "#6C5CE7",
   },
   errorContainer: {
     flex: 1,

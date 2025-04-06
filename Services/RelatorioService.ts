@@ -80,7 +80,7 @@ export const cadastrarRelatorio = async (
     startDate,
     endDate,
     pagina = 1,
-    quantidadeItens = 10,
+    quantidadeItens = 100,
   }: ListarRelatoriosParams): Promise<GetListaRelatorioResponse[]> => {
       try {
           const response = await api.get<GetListaRelatorioResponse[]>('/api/relatorio', {
@@ -120,7 +120,7 @@ export const compartilharRelatorioPlanilha = async (): Promise<void> => {
     const base64Data = arrayBufferToBase64(response.data);
 
     // Caminho do arquivo no dispositivo
-    const fileUri = FileSystem.documentDirectory + 'relatorio_geral.xlsx';
+    const fileUri = FileSystem.documentDirectory + 'relatorio_turma.xlsx';
 
     // Escrever o arquivo como Base64 no dispositivo
     await FileSystem.writeAsStringAsync(fileUri, base64Data, {
@@ -159,7 +159,7 @@ export const baixarRelatorioPlanilha = async (): Promise<void> => {
     }
 
     // Nome do arquivo da planilha
-    const fileUri = downloadsDirectory + 'relatorio_geral.xlsx';
+    const fileUri = downloadsDirectory + 'relatorio_turma.xlsx';
 
     // Escrever o arquivo como Base64 no dispositivo
     await FileSystem.writeAsStringAsync(fileUri, base64Data, {

@@ -1,19 +1,20 @@
+// @ts-ignore
+import { NavigationContainer } from '@react-navigation/native';
+// @ts-ignore
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { StyleSheet } from 'react-native';
 import { Login } from './Screens/Login/Login';
 import { Turma } from './Screens/Turma/Turma';
 import { Relatorios } from './Screens/Relatorio/Relatorios';
 import { CadastrarRelatorio } from './Screens/CadastrarRelatorio/CadastrarRelatorio';
 import { CadastrarPessoa } from './Screens/CadastrarPessoa/CadastrarPessoa';
-import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { setTopLevelNavigator } from './Services/NavigationServices';
 import { DetalhesRelatorio } from './Screens/Relatorio/DetalhesRelatorio';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { CadastrarTurma } from './Screens/CadastrarTurma/CadastrarTurma';
 import { Home, Users, FileText, PlusCircle } from 'react-native-feather';
 
-// Definição dos tipos para navegação
 export type RootStackParamList = {
   Login: undefined;
   MainTabs: undefined;
@@ -28,11 +29,9 @@ export type MainTabParamList = {
   CadastrarTurma: undefined;
 };
 
-// Criação dos navegadores
 const Stack = createStackNavigator<RootStackParamList>();
 const Tab = createBottomTabNavigator<MainTabParamList>();
 
-// Componente de navegação em abas
 function MainTabs() {
   return (
     <Tab.Navigator
@@ -48,9 +47,9 @@ function MainTabs() {
         name="Turma" 
         component={Turma} 
         options={{
-          tabBarLabel: 'Turmas',
-          tabBarIcon: ({ color, size }) => (
-            <Home width={22} height={22} color={color} />
+          tabBarLabel: 'Home',
+          tabBarIcon: ({ color, size }: { color: string; size: number }) => (
+            <Home width={size} height={size} color={color} />
           ),
         }}
       />
@@ -59,8 +58,8 @@ function MainTabs() {
         component={Relatorios} 
         options={{
           tabBarLabel: 'Relatórios',
-          tabBarIcon: ({ color, size }) => (
-            <FileText width={22} height={22} color={color} />
+          tabBarIcon: ({ color, size }: { color: string; size: number }) => (
+            <FileText width={size} height={size} color={color} />
           ),
         }}
       />
@@ -69,8 +68,8 @@ function MainTabs() {
         component={CadastrarPessoa} 
         options={{
           tabBarLabel: 'Pessoas',
-          tabBarIcon: ({ color, size }) => (
-            <Users width={22} height={22} color={color} />
+          tabBarIcon: ({ color, size }: { color: string; size: number }) => (
+            <Users width={size} height={size} color={color} />
           ),
         }}
       />
@@ -78,9 +77,9 @@ function MainTabs() {
         name="CadastrarTurma" 
         component={CadastrarTurma} 
         options={{
-          tabBarLabel: 'Cadastrar',
-          tabBarIcon: ({ color, size }) => (
-            <PlusCircle width={22} height={22} color={color} />
+          tabBarLabel: 'Turmas',
+          tabBarIcon: ({ color, size }: { color: string; size: number }) => (
+            <PlusCircle width={size} height={size} color={color} />
           ),
         }}
       />
@@ -88,32 +87,19 @@ function MainTabs() {
   );
 }
 
-// Componente principal do App
 export default function App() {
   return (
     <SafeAreaProvider> 
-      <NavigationContainer ref={(navigatorRef) => setTopLevelNavigator(navigatorRef)}>
+      <NavigationContainer ref={(navigatorRef: any) => setTopLevelNavigator(navigatorRef)}>
         <Stack.Navigator
           initialRouteName="Login"
           screenOptions={{
             headerShown: false,
           }}>
-          <Stack.Screen
-            name="Login"
-            component={Login}
-          />
-          <Stack.Screen
-            name="MainTabs"
-            component={MainTabs}
-          />
-          <Stack.Screen
-            name="CadastrarRelatorio"
-            component={CadastrarRelatorio}
-          />
-          <Stack.Screen
-            name="DetalhesRelatorio"
-            component={DetalhesRelatorio}
-          />
+          <Stack.Screen name="Login" component={Login} />
+          <Stack.Screen name="MainTabs" component={MainTabs} />
+          <Stack.Screen name="CadastrarRelatorio" component={CadastrarRelatorio} />
+          <Stack.Screen name="DetalhesRelatorio" component={DetalhesRelatorio} />
         </Stack.Navigator>
       </NavigationContainer>
     </SafeAreaProvider> 

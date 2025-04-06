@@ -115,8 +115,8 @@ export function Relatorios() {
                   return (
                     <Picker.Item 
                       key={month} 
-                      label={new Date(2024, index).toLocaleString('pt-BR', { month: 'long' })} 
-                      value={`2024-${month}`} 
+                      label={new Date(2025, index).toLocaleString('pt-BR', { month: 'long' })} 
+                      value={`2025-${month}`} 
                     />
                   );
                 })}
