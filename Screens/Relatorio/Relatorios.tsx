@@ -1,29 +1,39 @@
 import React, { useEffect, useState } from "react";
-import { 
-  Text, 
-  View, 
-  FlatList, 
-  ActivityIndicator, 
-  Alert, 
-  TouchableOpacity 
+import {
+  Text,
+  View,
+  FlatList,
+  ActivityIndicator,
+  Alert,
+  TouchableOpacity,
 } from "react-native";
 import { Picker } from "@react-native-picker/picker";
 import styles from "./StyleRelatorio";
 import { CardRelatorio } from "../../components/CardRelatorio/CardRelatorio";
-import { ListaRelatorioResponse, listarRelatorios } from "../../Services/RelatorioService";
+import {
+  ListaRelatorioResponse,
+  listarRelatorios,
+} from "../../Services/RelatorioService";
 import { buscaTurmas, GetTurmaResponse } from "../../Services/TurmaService";
-import { useNavigation, NavigationProp } from '@react-navigation/native';
-import { RootStackParamList } from '../../App';
+import { useNavigation, NavigationProp } from "@react-navigation/native";
+import { RootStackParamList } from "../../App";
+import { useFocusEffect } from '@react-navigation/native';
+import { useCallback } from 'react';
+
 
 export function Relatorios() {
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
-  const [selectedTurma, setSelectedTurma] = useState<number | undefined>(undefined);
+  const [selectedTurma, setSelectedTurma] = useState<number | undefined>(
+    undefined
+  );
   const [selectedData, setSelectedData] = useState("Selecione");
   const [relatorios, setRelatorios] = useState<ListaRelatorioResponse[]>([]);
   const [loading, setLoading] = useState(false);
   const [turmas, setTurmas] = useState<{ id: number; nome: string }[]>([]);
 
-  const fetchRelatorios = async (params: { classeId?: number; startDate?: string; endDate?: string } = {}) => {
+  const fetchRelatorios = async (
+    params: { classeId?: number; startDate?: string; endDate?: string } = {}
+  ) => {
     setLoading(true);
     try {
       const data = await listarRelatorios(params);
@@ -48,13 +58,30 @@ export function Relatorios() {
     }
   };
 
-  useEffect(() => {
-    fetchTurmas();
-    fetchRelatorios();
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      fetchTurmas();
+  
+      let params: { classeId?: number; startDate?: string; endDate?: string } = {};
+  
+      if (selectedData !== "Selecione") {
+        const [year, month] = selectedData.split("-");
+        const lastDay = new Date(Number(year), Number(month), 0).getDate();
+        params.startDate = `${selectedData}-01`;
+        params.endDate = `${selectedData}-${lastDay}`;
+      }
+  
+      if (selectedTurma !== undefined) {
+        params.classeId = selectedTurma;
+      }
+  
+      fetchRelatorios(params);
+    }, [selectedTurma, selectedData])
+  );
 
   useEffect(() => {
-    let params: { classeId?: number; startDate?: string; endDate?: string } = {};
+    let params: { classeId?: number; startDate?: string; endDate?: string } =
+      {};
 
     if (selectedData !== "Selecione") {
       const [year, month] = selectedData.split("-");
@@ -71,18 +98,22 @@ export function Relatorios() {
   }, [selectedTurma, selectedData]);
 
   const onPressRelatorio = (relatorioId: number) => {
-    navigation.navigate('DetalhesRelatorio', { relatorioId });
+    navigation.navigate("DetalhesRelatorio", { relatorioId });
   };
-  
-  const sortedRelatorios = relatorios.sort((a, b) => Number(b.relatorioId) - Number(a.relatorioId));
-  
+
+  const sortedRelatorios = relatorios.sort(
+    (a, b) => Number(b.relatorioId) - Number(a.relatorioId)
+  );
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Relatórios</Text>
-        <Text style={styles.headerSubtitle}>Visualize e filtre os relatórios</Text>
+        <Text style={styles.headerSubtitle}>
+          Visualize e filtre os relatórios
+        </Text>
       </View>
-      
+
       <View style={styles.filterContainer}>
         <View style={styles.filterRow}>
           <View style={styles.filterColumn}>
@@ -91,11 +122,19 @@ export function Relatorios() {
               <Picker
                 selectedValue={selectedTurma}
                 style={styles.picker}
-                onValueChange={(itemValue) => setSelectedTurma(itemValue === undefined ? undefined : Number(itemValue))}
+                onValueChange={(itemValue) =>
+                  setSelectedTurma(
+                    itemValue === undefined ? undefined : Number(itemValue)
+                  )
+                }
               >
                 <Picker.Item label="Todas" value={undefined} />
                 {turmas.map((turma) => (
-                  <Picker.Item key={turma.id} label={turma.nome} value={turma.id} />
+                  <Picker.Item
+                    key={turma.id}
+                    label={turma.nome}
+                    value={turma.id}
+                  />
                 ))}
               </Picker>
             </View>
@@ -112,11 +151,16 @@ export function Relatorios() {
                 <Picker.Item label="Todos" value="Selecione" />
                 {[...Array(12)].map((_, index) => {
                   const month = (index + 1).toString().padStart(2, "0");
+                  const label = new Date(2025, index).toLocaleString("pt-BR", {
+                    month: "long",
+                  });
                   return (
-                    <Picker.Item 
-                      key={month} 
-                      label={new Date(2025, index).toLocaleString('pt-BR', { month: 'long' })} 
-                      value={`2025-${month}`} 
+                    <Picker.Item
+                      key={month}
+                      label={`${label.charAt(0).toUpperCase()}${label.slice(
+                        1
+                      )}`}
+                      value={`2025-${month}`}
                     />
                   );
                 })}
@@ -134,14 +178,16 @@ export function Relatorios() {
         ) : sortedRelatorios.length === 0 ? (
           <View style={styles.emptyContainer}>
             <Text style={styles.emptyText}>Nenhum relatório encontrado</Text>
-            <Text style={styles.emptySubtext}>Tente ajustar os filtros ou criar um novo relatório</Text>
+            <Text style={styles.emptySubtext}>
+              Tente ajustar os filtros ou criar um novo relatório
+            </Text>
           </View>
         ) : (
           <FlatList
             data={sortedRelatorios}
             keyExtractor={(item) => item.relatorioId.toString()}
             renderItem={({ item }) => (
-              <TouchableOpacity 
+              <TouchableOpacity
                 style={styles.cardContainer}
                 onPress={() => onPressRelatorio(item.relatorioId)}
               >

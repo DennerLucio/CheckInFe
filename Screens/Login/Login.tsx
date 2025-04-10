@@ -12,7 +12,7 @@ import {
   Image,
   StatusBar,
 } from "react-native";
-import { LinearGradient } from 'expo-linear-gradient';
+import { LinearGradient } from "expo-linear-gradient";
 import styles from "./StyleLogin";
 import { useNavigation, NavigationProp } from "@react-navigation/native";
 import { RootStackParamList } from "../../App";
@@ -30,15 +30,14 @@ export function Login() {
       Alert.alert("Atenção", "Por favor, preencha todos os campos");
       return;
     }
-    
+
     setLoading(true);
     try {
-      const response = await login(email, password);
+      const result = await login(email, password);
 
-      if (response.success) {
+      if (result) {
         navigation.navigate("MainTabs");
-      }
-      else{
+      } else {
         Alert.alert("Erro de Login", "Usuário ou senha incorretos");
       }
     } catch (error) {
@@ -57,12 +56,12 @@ export function Login() {
     >
       <StatusBar barStyle="light-content" backgroundColor="#6C5CE7" />
       <LinearGradient
-        colors={['#6C5CE7', '#8E74FF']}
+        colors={["#6C5CE7", "#8E74FF"]}
         style={styles.gradientBackground}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
       >
-        <ScrollView 
+        <ScrollView
           contentContainerStyle={styles.scrollViewContent}
           showsVerticalScrollIndicator={false}
         >
@@ -72,14 +71,13 @@ export function Login() {
               <Text style={styles.titleBold}>In</Text>
               <Text style={styles.titleSub}>Fé</Text>
             </View>
-            
           </View>
 
           <View style={styles.formContainer}>
             <View style={styles.formCard}>
               <Text style={styles.formTitle}>Bem-vindo</Text>
               <Text style={styles.formSubtitle}>Faça login para continuar</Text>
-              
+
               <View style={styles.inputContainer}>
                 <Text style={styles.inputLabel}>Email</Text>
                 <TextInput

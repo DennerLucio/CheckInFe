@@ -14,6 +14,8 @@ import styles from "./StyleCadastrarPessoa";
 import { Picker } from "@react-native-picker/picker";
 import { buscaTurmas, GetTurmaResponse } from "../../Services/TurmaService";
 import { cadastraAluno, cadastraProfessor } from "../../Services/PessoaService";
+import { useFocusEffect } from "@react-navigation/native";
+import { useCallback } from "react";
 
 export interface Turma {
   id: number;
@@ -55,23 +57,24 @@ export function CadastrarPessoa() {
     }
   };
 
-  useEffect(() => {
-    const handleBuscaTurmas = async () => {
-      try {
-        const response: GetTurmaResponse = await buscaTurmas();
-        const formattedTurma: Turma[] = response.map((turma) => ({
-          id: turma.id,
-          nome: turma.nome,
-        }));
-
-        setTurma(formattedTurma);
-      } catch (error) {
-        Alert.alert("Erro", "Não foi possível carregar as turmas.");
-      }
-    };
-
-    handleBuscaTurmas();
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      const handleBuscaTurmas = async () => {
+        try {
+          const response: GetTurmaResponse = await buscaTurmas();
+          const formattedTurma: Turma[] = response.map((turma) => ({
+            id: turma.id,
+            nome: turma.nome,
+          }));
+          setTurma(formattedTurma);
+        } catch (error) {
+          Alert.alert("Erro", "Não foi possível carregar as turmas.");
+        }
+      };
+  
+      handleBuscaTurmas();
+    }, [])
+  );
 
   return (
     <KeyboardAvoidingView
