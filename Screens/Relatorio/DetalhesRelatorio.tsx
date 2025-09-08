@@ -11,6 +11,21 @@ interface DetalhesRelatorioProps {
   route: RouteProp<RootStackParamList, "DetalhesRelatorio">;
 }
 
+// Relatório consolidado
+interface ListaRelatorioConsolidado {
+  totalBiblias: number;
+  totalFaltas: number;
+  totalOferta: number;
+  totalPresentes: number;
+  totalRevistas: number;
+  totalVisitantes: number;
+}
+
+// Type guard para relatório consolidado
+function isConsolidado(relatorio: any): relatorio is ListaRelatorioConsolidado {
+  return 'totalBiblias' in relatorio;
+}
+
 function formatarData(dataISO: string): string {
   const data = new Date(dataISO);
   const dia = data.getDate().toString().padStart(2, "0");
@@ -20,26 +35,30 @@ function formatarData(dataISO: string): string {
 }
 
 export function DetalhesRelatorio({ route }: DetalhesRelatorioProps) {
-  const { relatorioId } = route.params;
-  const [relatorio, setRelatorio] = useState<RelatorioResponse | null>(null);
+  const { relatorioId, dadosRelatorio } = route.params;
+
+  const [relatorio, setRelatorio] = useState<RelatorioResponse | ListaRelatorioConsolidado | null>(dadosRelatorio || null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchRelatorio = async () => {
-      try {
-        const data = await infoRelatorio(relatorioId);
-        setRelatorio(data);
-      } catch (error) {
-        console.error("Erro ao buscar detalhes do relatório:", error);
-        setError("Não foi possível carregar os detalhes do relatório.");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchRelatorio();
-  }, [relatorioId]);
+    if (!dadosRelatorio) {
+      const fetchRelatorio = async () => {
+        try {
+          const data = await infoRelatorio(relatorioId);
+          setRelatorio(data);
+        } catch (error) {
+          console.error("Erro ao buscar detalhes do relatório:", error);
+          setError("Não foi possível carregar os detalhes do relatório.");
+        } finally {
+          setLoading(false);
+        }
+      };
+      fetchRelatorio();
+    } else {
+      setLoading(false);
+    }
+  }, [relatorioId, dadosRelatorio]);
 
   const handleGerarRelatorio = async () => {
     try {
@@ -57,7 +76,6 @@ export function DetalhesRelatorio({ route }: DetalhesRelatorioProps) {
     } catch (error: unknown) {
       console.error('Erro ao baixar planilha:', error);
       if (error instanceof AxiosError && error.response) {
-        console.error('Resposta do erro:', error.response.data);
         setError('Erro ao baixar o relatório: ' + error.response.data);
       } else {
         setError('Não foi possível baixar a planilha. Tente novamente mais tarde.');
@@ -67,10 +85,10 @@ export function DetalhesRelatorio({ route }: DetalhesRelatorioProps) {
   };
 
   const handleEditarRelatorio = () => {
-    if (!relatorio) return;
+    if (!relatorio || isConsolidado(relatorio)) return;
 
     NavigationServices.navigate('CadastrarRelatorio', {
-      turmaId: relatorio.classeId      , // certifique-se de que sua API retorna turmaId
+      turmaId: relatorio.classeId, // somente RelatorioResponse tem classeId
       relatorioId: relatorioId,
       dadosRelatorio: relatorio
     });
@@ -96,120 +114,59 @@ export function DetalhesRelatorio({ route }: DetalhesRelatorioProps) {
     <View style={styles.container}>
       <Text style={styles.title}>Detalhes do Relatório</Text>
       <View style={styles.card}>
-        <Text style={styles.label}>📅 Data: {formatarData(relatorio.data)}</Text>
-        <Text style={styles.label}>👨‍🏫 Professor: {relatorio.professor ?? 'Não informado'}</Text>
-        <Text style={styles.label}>📖 Quantidade de Bíblias: {relatorio.quantidadeBiblias}</Text>
-        <Text style={styles.label}>💰 Oferta: {relatorio.oferta}</Text>
-        <Text style={styles.label}>👥 Presentes: {relatorio.presentes}</Text>
-        <Text style={styles.label}>📝 Observação: {relatorio.observacao}</Text>
+        {isConsolidado(relatorio) ? (
+          // Relatório consolidado
+          <>
+            <Text style={styles.label}>📖 Total de Bíblias: {relatorio.totalBiblias}</Text>
+            <Text style={styles.label}>💰 Total de Ofertas: {relatorio.totalOferta}</Text>
+            <Text style={styles.label}>👥 Total Presentes: {relatorio.totalPresentes}</Text>
+            <Text style={styles.label}>📝 Total de Revistas: {relatorio.totalRevistas}</Text>
+            <Text style={styles.label}>👥 Total Visitantes: {relatorio.totalVisitantes}</Text>
+            <Text style={styles.label}>❌ Total de Faltas: {relatorio.totalFaltas}</Text>
+          </>
+        ) : (
+          // Relatório normal
+          <>
+            <Text style={styles.label}>📅 Data: {formatarData(relatorio.data)}</Text>
+            <Text style={styles.label}>👨‍🏫 Professor: {relatorio.professor ?? '-'}</Text>
+            <Text style={styles.label}>📖 Quantidade de Bíblias: {relatorio.quantidadeBiblias}</Text>
+            <Text style={styles.label}>💰 Oferta: {relatorio.oferta}</Text>
+            <Text style={styles.label}>👥 Presentes: {relatorio.presentes}</Text>
+            <Text style={styles.label}>📝 Observação: {relatorio.observacao}</Text>
+          </>
+        )}
       </View>
 
-      <TouchableOpacity style={styles.button} onPress={handleGerarRelatorio}>
-        <Text style={styles.buttonText}>Compartilhar Relatório</Text>
-      </TouchableOpacity>
+      {!isConsolidado(relatorio) && (
+        <>
+          <TouchableOpacity style={styles.button} onPress={handleGerarRelatorio}>
+            <Text style={styles.buttonText}>Compartilhar Relatório</Text>
+          </TouchableOpacity>
 
-      <TouchableOpacity style={[styles.button, styles.downloadButton]} onPress={handleBaixarRelatorio}>
-        <Text style={styles.buttonText}>Baixar Relatório</Text>
-      </TouchableOpacity>
+          <TouchableOpacity style={[styles.button, styles.downloadButton]} onPress={handleBaixarRelatorio}>
+            <Text style={styles.buttonText}>Baixar Relatório</Text>
+          </TouchableOpacity>
 
-      <TouchableOpacity style={[styles.button, styles.editButton]} onPress={handleEditarRelatorio}>
-        <Text style={styles.buttonText}>Editar Relatório</Text>
-      </TouchableOpacity>
+          <TouchableOpacity style={[styles.button, styles.editButton]} onPress={handleEditarRelatorio}>
+            <Text style={styles.buttonText}>Editar Relatório</Text>
+          </TouchableOpacity>
+        </>
+      )}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#F5F7FF",
-    padding: 20,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: "bold",
-    color: "#333B69",
-    marginBottom: 20,
-    marginTop: 10,
-  },
-  card: {
-    backgroundColor: "#FFFFFF",
-    borderRadius: 12,
-    padding: 20,
-    marginBottom: 20,
-    elevation: 2,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-  },
-  label: {
-    fontSize: 16,
-    color: "#333B69",
-    marginBottom: 16,
-    fontWeight: "500",
-  },
-  button: {
-    backgroundColor: "#6C5CE7",
-    padding: 16,
-    borderRadius: 10,
-    alignItems: "center",
-    marginBottom: 16,
-    elevation: 2,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-  },
-  buttonText: {
-    color: "#FFFFFF",
-    fontSize: 16,
-    fontWeight: "600",
-  },
-  downloadButton: {
-    backgroundColor: "#6C5CE7",
-  },
-  editButton: {
-    backgroundColor: "#c9ab00ff",
-  },
-  errorContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    padding: 20,
-    backgroundColor: "#F5F7FF",
-  },
-  errorText: {
-    color: "#FF6B6B",
-    textAlign: "center",
-    fontSize: 16,
-    backgroundColor: "#FFFFFF",
-    padding: 20,
-    borderRadius: 12,
-    elevation: 2,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    width: "100%",
-  },
-  loading: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  noData: {
-    color: "#333B69",
-    textAlign: "center",
-    fontSize: 18,
-    padding: 20,
-    backgroundColor: "#FFFFFF",
-    margin: 20,
-    borderRadius: 12,
-    elevation: 2,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-  },
+  container: { flex: 1, backgroundColor: "#F5F7FF", padding: 20 },
+  title: { fontSize: 24, fontWeight: "bold", color: "#333B69", marginBottom: 20, marginTop: 10 },
+  card: { backgroundColor: "#FFFFFF", borderRadius: 12, padding: 20, marginBottom: 20, elevation: 2, shadowColor: "#000", shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 4 },
+  label: { fontSize: 16, color: "#333B69", marginBottom: 16, fontWeight: "500" },
+  button: { backgroundColor: "#6C5CE7", padding: 16, borderRadius: 10, alignItems: "center", marginBottom: 16, elevation: 2, shadowColor: "#000", shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 4 },
+  buttonText: { color: "#FFFFFF", fontSize: 16, fontWeight: "600" },
+  downloadButton: { backgroundColor: "#6C5CE7" },
+  editButton: { backgroundColor: "#c9ab00ff" },
+  errorContainer: { flex: 1, justifyContent: "center", alignItems: "center", padding: 20, backgroundColor: "#F5F7FF" },
+  errorText: { color: "#FF6B6B", textAlign: "center", fontSize: 16, backgroundColor: "#FFFFFF", padding: 20, borderRadius: 12, elevation: 2, shadowColor: "#000", shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 4, width: "100%" },
+  loading: { flex: 1, justifyContent: "center", alignItems: "center" },
+  noData: { color: "#333B69", textAlign: "center", fontSize: 18, padding: 20, backgroundColor: "#FFFFFF", margin: 20, borderRadius: 12, elevation: 2, shadowColor: "#000", shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 4 },
 });

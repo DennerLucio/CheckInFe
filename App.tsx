@@ -24,7 +24,10 @@ export type RootStackParamList = {
     relatorioId?: number;           // opcional para edição
     dadosRelatorio?: RelatorioResponse; // opcional para preencher campos
   };
-  DetalhesRelatorio: { relatorioId: number };
+  DetalhesRelatorio: { 
+  relatorioId: number;
+  dadosRelatorio?: RelatorioResponse | any; // <- aqui aceita o consolidado sem erro de tipo
+};
 };
 
 
