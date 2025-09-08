@@ -1,6 +1,6 @@
-// @ts-ignore
+import 'react-native-gesture-handler'; // <--- IMPORTANTE: precisa ser a primeira linha
 import { NavigationContainer } from '@react-navigation/native';
-// @ts-ignore
+
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { StyleSheet } from 'react-native';
 import { Login } from './Screens/Login/Login';
@@ -14,13 +14,19 @@ import { DetalhesRelatorio } from './Screens/Relatorio/DetalhesRelatorio';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { CadastrarTurma } from './Screens/CadastrarTurma/CadastrarTurma';
 import { Home, Users, FileText, PlusCircle } from 'react-native-feather';
+import { RelatorioResponse } from './Services/RelatorioService';
 
 export type RootStackParamList = {
   Login: undefined;
   MainTabs: undefined;
-  CadastrarRelatorio: { turmaId: number };
+  CadastrarRelatorio: { 
+    turmaId: number;
+    relatorioId?: number;           // opcional para edição
+    dadosRelatorio?: RelatorioResponse; // opcional para preencher campos
+  };
   DetalhesRelatorio: { relatorioId: number };
 };
+
 
 export type MainTabParamList = {
   Turma: undefined;

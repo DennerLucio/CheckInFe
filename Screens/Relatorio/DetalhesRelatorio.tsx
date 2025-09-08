@@ -5,6 +5,7 @@ import { RouteProp } from "@react-navigation/native";
 import { RootStackParamList } from "../../App";
 import { compartilharRelatorioPlanilha, baixarRelatorioPlanilha } from "../../Services/RelatorioService";
 import { AxiosError } from 'axios';
+import * as NavigationServices from '../../Services/NavigationServices';
 
 interface DetalhesRelatorioProps {
   route: RouteProp<RootStackParamList, "DetalhesRelatorio">;
@@ -65,6 +66,16 @@ export function DetalhesRelatorio({ route }: DetalhesRelatorioProps) {
     }
   };
 
+  const handleEditarRelatorio = () => {
+    if (!relatorio) return;
+
+    NavigationServices.navigate('CadastrarRelatorio', {
+      turmaId: relatorio.classeId      , // certifique-se de que sua API retorna turmaId
+      relatorioId: relatorioId,
+      dadosRelatorio: relatorio
+    });
+  };
+
   if (loading) {
     return <ActivityIndicator size="large" color="#6C5CE7" style={styles.loading} />;
   }
@@ -92,11 +103,17 @@ export function DetalhesRelatorio({ route }: DetalhesRelatorioProps) {
         <Text style={styles.label}>👥 Presentes: {relatorio.presentes}</Text>
         <Text style={styles.label}>📝 Observação: {relatorio.observacao}</Text>
       </View>
+
       <TouchableOpacity style={styles.button} onPress={handleGerarRelatorio}>
         <Text style={styles.buttonText}>Compartilhar Relatório</Text>
       </TouchableOpacity>
+
       <TouchableOpacity style={[styles.button, styles.downloadButton]} onPress={handleBaixarRelatorio}>
         <Text style={styles.buttonText}>Baixar Relatório</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity style={[styles.button, styles.editButton]} onPress={handleEditarRelatorio}>
+        <Text style={styles.buttonText}>Editar Relatório</Text>
       </TouchableOpacity>
     </View>
   );
@@ -151,6 +168,9 @@ const styles = StyleSheet.create({
   },
   downloadButton: {
     backgroundColor: "#6C5CE7",
+  },
+  editButton: {
+    backgroundColor: "#c9ab00ff",
   },
   errorContainer: {
     flex: 1,

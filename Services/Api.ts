@@ -1,12 +1,12 @@
 import axios, { AxiosInstance, InternalAxiosRequestConfig } from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const useLocalAPI = false;
+const useLocalAPI = true;
 
 const axiosConfig = {
   baseURL: useLocalAPI
-    ? 'http://192.168.56.1:5000/' // Local
-    : 'http://212.85.17.233:5001/', // Produção
+    ? 'http://172.26.240.1:5001/' // Local
+    : 'https://api.checkinfe.com.br/', // Produção
   headers: {
     'Content-Type': 'application/json',
   },

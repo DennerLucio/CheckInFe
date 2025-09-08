@@ -18,7 +18,7 @@ import { useRoute, RouteProp } from "@react-navigation/native";
 import styles from "./StyleCadastrarRelatorio";
 import { buscaProfessor } from "../../Services/PessoaService";
 import { buscaAluno } from "../../Services/TurmaService";
-import { cadastrarRelatorio } from "../../Services/RelatorioService";
+import { cadastrarRelatorio, editarRelatorio } from "../../Services/RelatorioService";
 
 interface Item {
   alunoId: number;
@@ -27,8 +27,10 @@ interface Item {
 
 export function CadastrarRelatorio() {
   const route =
-    useRoute<RouteProp<{ params: { turmaId: number } }, "params">>();
+    useRoute<RouteProp<{ params: { turmaId: number; relatorioId?: number; dadosRelatorio?: any } }, "params">>();
   const turmaId = route.params.turmaId;
+  const relatorioId = route.params.relatorioId;
+  const dadosRelatorio = route.params.dadosRelatorio;
 
   const [oferta, setOferta] = useState<string>("");
   const [visitantes, setVisitantes] = useState<string>("");
@@ -73,6 +75,26 @@ export function CadastrarRelatorio() {
     fetchAlunosEProfessores();
   }, [turmaId]);
 
+  // Preencher campos caso seja edição
+  useEffect(() => {
+    if (dadosRelatorio) {
+      setOferta(dadosRelatorio.oferta?.toString() || "");
+      setVisitantes(dadosRelatorio.visitantes?.toString() || "");
+      setBiblias(dadosRelatorio.quantidadeBiblias?.toString() || "");
+      setRevistas(dadosRelatorio.revistas?.toString() || "");
+      setObs(dadosRelatorio.observacao || "");
+      setProfessorId(dadosRelatorio.professorId || null);
+
+      if (dadosRelatorio.presencas) {
+        const presencaMap: Record<number, boolean> = {};
+        dadosRelatorio.presencas.forEach((p: any) => {
+          presencaMap[p.alunoId] = p.presente;
+        });
+        setSelectedItems(presencaMap);
+      }
+    }
+  }, [dadosRelatorio]);
+
   const toggleCheckbox = (id: number) => {
     setSelectedItems((prev) => ({
       ...prev,
@@ -113,18 +135,35 @@ export function CadastrarRelatorio() {
     setLoading(true);
   
     try {
-      await cadastrarRelatorio(
-        obs,
-        ofertaValue,
-        professorId,
-        bibliasValue,
-        revistasValue,
-        visitantesValue,
-        turmaId,
-        alunosPresentesIds
-      );
-  
-      Alert.alert("Sucesso", "Relatório cadastrado com sucesso");
+      if (relatorioId) {
+        // editar relatório
+        await editarRelatorio({
+          id: relatorioId,
+          data: dadosRelatorio?.data || new Date().toISOString(),
+          observacao: obs,
+          oferta: ofertaValue,
+          quantidadeBiblias: bibliasValue,
+          professorId: professorId!,
+          presencas: alunos.map((aluno) => ({
+            alunoId: aluno.alunoId,
+            presente: !!selectedItems[aluno.alunoId],
+          })),
+        });
+        Alert.alert("Sucesso", "Relatório atualizado com sucesso");
+      } else {
+        // cadastrar relatório
+        await cadastrarRelatorio(
+          obs,
+          ofertaValue,
+          professorId!,
+          bibliasValue,
+          revistasValue,
+          visitantesValue,
+          turmaId,
+          alunosPresentesIds
+        );
+        Alert.alert("Sucesso", "Relatório cadastrado com sucesso");
+      }
   
       setOferta("");
       setVisitantes("");
@@ -134,8 +173,8 @@ export function CadastrarRelatorio() {
       setSelectedItems({});
       setProfessorId(null);
     } catch (error) {
-      Alert.alert("Erro", "Erro ao cadastrar o relatório.");
-      console.error("Erro ao cadastrar relatório:", error);
+      Alert.alert("Erro", relatorioId ? "Erro ao atualizar o relatório." : "Erro ao cadastrar o relatório.");
+      console.error("Erro ao enviar relatório:", error);
     } finally {
       setLoading(false);
     }
@@ -164,7 +203,7 @@ export function CadastrarRelatorio() {
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.header}>
-          <Text style={styles.headerTitle}>Cadastrar Relatório</Text>
+          <Text style={styles.headerTitle}>{relatorioId ? "Editar Relatório" : "Cadastrar Relatório"}</Text>
           <Text style={styles.headerSubtitle}>Preencha os dados da aula</Text>
         </View>
 
@@ -285,7 +324,7 @@ export function CadastrarRelatorio() {
           {loading ? (
             <ActivityIndicator color="#FFF" />
           ) : (
-            <Text style={styles.submitButtonText}>Enviar Relatório</Text>
+            <Text style={styles.submitButtonText}>{relatorioId ? "Atualizar Relatório" : "Enviar Relatório"}</Text>
           )}
         </TouchableOpacity>
       </ScrollView>

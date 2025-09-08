@@ -27,6 +27,23 @@ export const cadastraAluno = async ( nome:string, classeId:number): Promise<Cada
     }
 };
 
+
+export const deletaAluno = async (id: number, classeId: number): Promise<void> => {
+    try {
+        await api.delete(`/api/Aluno/${id}`, {
+            data: { classeId },
+            headers: {
+                'Content-Type': 'application/json-patch+json'
+            }
+        });
+        console.log(`Aluno com ID ${id} deletado com sucesso.`);
+    } catch (error) {
+        console.error(`Erro ao deletar aluno com ID ${id}:`, error);
+        throw error;
+    }
+};
+
+
 export const cadastraProfessor = async (nome:string, classeId:number): Promise<CadastrarPessoaResponse> => {
     try {
         const response = await api.post<CadastrarPessoaResponse>('/api/Professor', { nome, classeId });
@@ -43,6 +60,16 @@ export const buscaProfessor = async (): Promise<ProfessorResponse[]> => {
         return response.data;
     } catch (error) {
         console.error('Erro ao buscar professor:', error);
+        throw error;
+    }
+};
+
+export const deletaProfessor = async (id: number): Promise<void> => {
+    try {
+        await api.delete(`/api/Professor/${id}`);
+        console.log(`Professor com ID ${id} deletado com sucesso.`);
+    } catch (error) {
+        console.error(`Erro ao deletar professor com ID ${id}:`, error);
         throw error;
     }
 };

@@ -16,6 +16,19 @@ export interface AlunoPresenca {
   };
 }
 
+export interface EditarRelatorioRequest {
+  id: number;
+  data: string;
+  observacao: string;
+  oferta: number;
+  quantidadeBiblias: number;
+  professorId: number;
+  presencas: {
+    alunoId: number;
+    presente: boolean;
+  }[];
+}
+
 export interface RelatorioResponse {
   id: number;
   data: string;
@@ -186,4 +199,27 @@ export const baixarRelatorioPlanilha = async (): Promise<void> => {
 const arrayBufferToBase64 = (arrayBuffer: ArrayBuffer): string => {
   const uint8Array = new Uint8Array(arrayBuffer);
   return btoa(String.fromCharCode(...uint8Array)); // Converte ArrayBuffer para Base64
+};
+
+
+
+export const editarRelatorio = async (
+  relatorio: EditarRelatorioRequest
+): Promise<CadastrarRelatorioResponse> => {
+  try {
+    const response = await api.put<CadastrarRelatorioResponse>(
+      '/api/relatorio',
+      relatorio,
+      {
+        headers: {
+          'Content-Type': 'application/json-patch+json',
+        },
+      }
+    );
+    console.log('Relatório editado com sucesso:', response.data);
+    return response.data;
+  } catch (error) {
+    console.error('Erro ao editar relatório:', error);
+    throw new Error("Não foi possível editar o relatório. Tente novamente mais tarde.");
+  }
 };

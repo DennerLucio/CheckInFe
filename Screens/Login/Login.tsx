@@ -40,10 +40,35 @@ export function Login() {
       } else {
         Alert.alert("Erro de Login", "Usuário ou senha incorretos");
       }
-    } catch (error) {
-      console.log(error);
-      Alert.alert("Erro", "Ocorreu um erro inesperado. Tente novamente.");
-    } finally {
+    } catch (error: any) {
+      // Erro de rede
+      if (error.response) {
+        Alert.alert(
+          "Erro de Rede",
+          `Ocorreu um erro ao tentar se conectar com o servidor. Código de status: ${error.response.status}. Mensagem: ${error.response?.data?.message || "Erro desconhecido."}`
+        );
+      } 
+      // Se não houver resposta da API
+      else if (error.request) {
+        Alert.alert(
+          "Erro de Conexão",
+          "Não conseguimos receber uma resposta do servidor. Verifique sua conexão com a internet."
+        );
+      } 
+      // Outros erros (como erros de configuração ou outros problemas)
+      else {
+        Alert.alert(
+          "Erro Inesperado",
+          `Ocorreu um erro inesperado: ${error.message || "Erro desconhecido."}`
+        );
+      }
+    
+      // Exibe a mensagem de erro em um Alert diretamente para o usuário
+      if (error.stack) {
+        console.log("Stack trace:", error.stack);  // Para depuração adicional, caso necessário
+      }
+    }
+     finally {
       setLoading(false);
     }
   };
