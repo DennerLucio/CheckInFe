@@ -18,7 +18,7 @@ import { useRoute, RouteProp } from "@react-navigation/native";
 import styles from "./StyleCadastrarRelatorio";
 import { buscaProfessor } from "../../Services/PessoaService";
 import { buscaAluno } from "../../Services/TurmaService";
-import { cadastrarRelatorio, editarRelatorio } from "../../Services/RelatorioService";
+import { cadastrarRelatorio, editarRelatorio, EditarRelatorioRequest } from "../../Services/RelatorioService";
 
 interface Item {
   alunoId: number;
@@ -43,6 +43,7 @@ export function CadastrarRelatorio() {
   const [professorId, setProfessorId] = useState<number | null>(null);
   const [professores, setProfessores] = useState<{ id: number; nome: string }[]>([]);
 
+  // Buscar alunos e professores
   useEffect(() => {
     const fetchAlunosEProfessores = async () => {
       try {
@@ -137,7 +138,7 @@ export function CadastrarRelatorio() {
     try {
       if (relatorioId) {
         // editar relatório
-        await editarRelatorio({
+        const relatorioParaEditar: EditarRelatorioRequest = {
           id: relatorioId,
           data: dadosRelatorio?.data || new Date().toISOString(),
           observacao: obs,
@@ -148,7 +149,9 @@ export function CadastrarRelatorio() {
             alunoId: aluno.alunoId,
             presente: !!selectedItems[aluno.alunoId],
           })),
-        });
+        };
+
+        await editarRelatorio(relatorioParaEditar);
         Alert.alert("Sucesso", "Relatório atualizado com sucesso");
       } else {
         // cadastrar relatório

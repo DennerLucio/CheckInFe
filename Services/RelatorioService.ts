@@ -18,6 +18,19 @@ export interface AlunoPresenca {
 
 export interface EditarRelatorioRequest {
   id: number;
+  data: string; // ISO string
+  observacao: string;
+  oferta: number;
+  quantidadeBiblias: number;
+  professorId: number;
+  presencas: {
+    alunoId: number;
+    presente: boolean;
+  }[];
+}
+
+export interface EditarRelatorioResponse {
+  id: number;
   data: string;
   observacao: string;
   oferta: number;
@@ -28,6 +41,8 @@ export interface EditarRelatorioRequest {
     presente: boolean;
   }[];
 }
+
+
 
 export interface RelatorioResponse {
   id: number;
@@ -56,11 +71,11 @@ export interface ListarRelatoriosParams {
   quantidadeItens?: number;
 }
 
-// 🔥 NOVA INTERFACE PARA O CONSOLIDADO
+// NOVA INTERFACE PARA O CONSOLIDADO
 export interface RelatorioConsolidadoResponse {
   totalBiblias: number;
   totalFaltas: number;
-  totalOfertas: number;
+  totalOferta: number;
   totalPresentes: number;
   totalRevistas: number;
   totalVisitantes: number;
@@ -224,11 +239,13 @@ const arrayBufferToBase64 = (arrayBuffer: ArrayBuffer): string => {
   return btoa(String.fromCharCode(...uint8Array));
 };
 
+
+
 export const editarRelatorio = async (
   relatorio: EditarRelatorioRequest
-): Promise<CadastrarRelatorioResponse> => {
+): Promise<EditarRelatorioResponse> => {
   try {
-    const response = await api.put<CadastrarRelatorioResponse>(
+    const response = await api.put<EditarRelatorioResponse>(
       '/api/relatorio',
       relatorio,
       {
@@ -237,10 +254,18 @@ export const editarRelatorio = async (
         },
       }
     );
-    console.log('Relatório editado com sucesso:', response.data);
+    console.log('✅ Relatório editado com sucesso:', response.data);
     return response.data;
-  } catch (error) {
-    console.error('Erro ao editar relatório:', error);
-    throw new Error('Não foi possível editar o relatório. Tente novamente mais tarde.');
+  } catch (error: any) {
+    if (error.response) {
+      console.error('❌ Erro da API ao editar relatório:', error.response.data);
+      throw new Error(error.response.data?.message || 'Erro ao editar relatório.');
+    } else {
+      console.error('❌ Erro inesperado ao editar relatório:', error.message);
+      throw new Error('Não foi possível editar o relatório. Tente novamente mais tarde.');
+    }
   }
 };
+
+
+
