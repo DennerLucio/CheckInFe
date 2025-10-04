@@ -17,20 +17,18 @@ interface DetalhesRelatorioProps {
   route: RouteProp<RootStackParamList, "DetalhesRelatorio">
 }
 
-// Relatório consolidado
 interface ListaRelatorioConsolidado {
   totalBiblias: number
   totalFaltas: number
-  totalOfertas: number
+  totalOferta: number
   totalPresentes: number
   totalRevistas: number
   totalVisitantes: number
   data?: string
-  relatorioId?: number // Para exibição no FlatList
+  relatorioId?: number
   nomeClasse?: string
 }
 
-// Type guard para relatório consolidado
 function isConsolidado(relatorio: any): relatorio is ListaRelatorioConsolidado {
   return "totalBiblias" in relatorio && !("id" in relatorio)
 }
@@ -56,14 +54,12 @@ export function DetalhesRelatorio({ route }: DetalhesRelatorioProps) {
   useEffect(() => {
     const isConsolidadoReport = dadosRelatorio && isConsolidado(dadosRelatorio)
 
-    // Se for consolidado e tiver dados, não faz fetch
     if (isConsolidadoReport) {
       setRelatorio(dadosRelatorio)
       setLoading(false)
       return
     }
 
-    // Para relatórios comuns, sempre faz fetch para pegar dados completos
     const fetchRelatorio = async () => {
       try {
         const data = await infoRelatorio(relatorioId)
@@ -103,14 +99,25 @@ export function DetalhesRelatorio({ route }: DetalhesRelatorioProps) {
     }
   }
 
-  const handleEditarRelatorio = () => {
+  const handleEditarRelatorio = async () => {
     if (!relatorio || isConsolidado(relatorio)) return
 
-    NavigationServices.navigate("CadastrarRelatorio", {
-      turmaId: relatorio.classeId,
-      relatorioId: relatorio.id,
-      dadosRelatorio: relatorio,
-    })
+    try {
+      setLoading(true)
+      
+      const dadosCompletos = await infoRelatorio(relatorio.id)
+
+      NavigationServices.navigate("CadastrarRelatorio", {
+        turmaId: dadosCompletos.classeId,
+        relatorioId: dadosCompletos.id,
+        dadosRelatorio: dadosCompletos,
+      })
+    } catch (error) {
+      console.error("Erro ao buscar dados do relatório:", error)
+      Alert.alert("Erro", "Não foi possível carregar os dados do relatório para edição.")
+    } finally {
+      setLoading(false)
+    }
   }
 
   if (loading) return <ActivityIndicator size="large" color="#6C5CE7" style={styles.loading} />
@@ -131,7 +138,7 @@ export function DetalhesRelatorio({ route }: DetalhesRelatorioProps) {
         {isConsolidado(relatorio) ? (
           <>
             <Text style={styles.label}>📖 Total de Bíblias: {relatorio.totalBiblias}</Text>
-            <Text style={styles.label}>💰 Total de Ofertas: {relatorio.totalOfertas}</Text>
+            <Text style={styles.label}>💰 Total de Ofertas: {relatorio.totalOferta}</Text>
             <Text style={styles.label}>👥 Total Presentes: {relatorio.totalPresentes}</Text>
             <Text style={styles.label}>📝 Total de Revistas: {relatorio.totalRevistas}</Text>
             <Text style={styles.label}>👥 Total Visitantes: {relatorio.totalVisitantes}</Text>
@@ -159,9 +166,9 @@ export function DetalhesRelatorio({ route }: DetalhesRelatorioProps) {
             <Text style={styles.buttonText}>Baixar Relatório</Text>
           </TouchableOpacity>
 
-          {/* <TouchableOpacity style={[styles.button, styles.editButton]} onPress={handleEditarRelatorio}>
+          <TouchableOpacity style={[styles.button, styles.editButton]} onPress={handleEditarRelatorio}>
             <Text style={styles.buttonText}>Editar Relatório</Text>
-          </TouchableOpacity> */}
+          </TouchableOpacity>
         </>
       )}
     </View>

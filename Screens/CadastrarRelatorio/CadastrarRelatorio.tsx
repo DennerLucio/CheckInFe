@@ -1,143 +1,144 @@
-import React, { useState, useEffect } from "react";
+"use client"
+
+import { useState, useEffect } from "react"
 import {
   Text,
   TextInput,
   View,
   FlatList,
-  ListRenderItem,
+  type ListRenderItem,
   TouchableOpacity,
   Alert,
   ActivityIndicator,
   ScrollView,
   KeyboardAvoidingView,
-  Platform
-} from "react-native";
-import Checkbox from "expo-checkbox";
-import { Picker } from "@react-native-picker/picker";
-import { useRoute, RouteProp } from "@react-navigation/native";
-import styles from "./StyleCadastrarRelatorio";
-import { buscaProfessor } from "../../Services/PessoaService";
-import { buscaAluno } from "../../Services/TurmaService";
-import { cadastrarRelatorio, editarRelatorio, EditarRelatorioRequest } from "../../Services/RelatorioService";
+  Platform,
+} from "react-native"
+import Checkbox from "expo-checkbox"
+import { Picker } from "@react-native-picker/picker"
+import { useRoute, type RouteProp } from "@react-navigation/native"
+import styles from "./StyleCadastrarRelatorio"
+import { buscaProfessor } from "../../Services/PessoaService"
+import { buscaAluno } from "../../Services/TurmaService"
+import { cadastrarRelatorio, editarRelatorio, type EditarRelatorioRequest } from "../../Services/RelatorioService"
 
 interface Item {
-  alunoId: number;
-  name: string;
+  alunoId: number
+  name: string
 }
 
 export function CadastrarRelatorio() {
   const route =
-    useRoute<RouteProp<{ params: { turmaId: number; relatorioId?: number; dadosRelatorio?: any } }, "params">>();
-  const turmaId = route.params.turmaId;
-  const relatorioId = route.params.relatorioId;
-  const dadosRelatorio = route.params.dadosRelatorio;
+    useRoute<RouteProp<{ params: { turmaId: number; relatorioId?: number; dadosRelatorio?: any } }, "params">>()
+  const turmaId = route.params.turmaId
+  const relatorioId = route.params.relatorioId
+  const dadosRelatorio = route.params.dadosRelatorio
 
-  const [oferta, setOferta] = useState<string>("");
-  const [visitantes, setVisitantes] = useState<string>("");
-  const [biblias, setBiblias] = useState<string>("");
-  const [revistas, setRevistas] = useState<string>("");
-  const [obs, setObs] = useState<string>("");
-  const [selectedItems, setSelectedItems] = useState<Record<number, boolean>>({});
-  const [alunos, setAlunos] = useState<Item[]>([]);
-  const [loading, setLoading] = useState<boolean>(false);
-  const [professorId, setProfessorId] = useState<number | null>(null);
-  const [professores, setProfessores] = useState<{ id: number; nome: string }[]>([]);
+  const [oferta, setOferta] = useState<string>("")
+  const [visitantes, setVisitantes] = useState<string>("")
+  const [biblias, setBiblias] = useState<string>("")
+  const [revistas, setRevistas] = useState<string>("")
+  const [obs, setObs] = useState<string>("")
+  const [selectedItems, setSelectedItems] = useState<Record<number, boolean>>({})
+  const [alunos, setAlunos] = useState<Item[]>([])
+  const [loading, setLoading] = useState<boolean>(false)
+  const [professorId, setProfessorId] = useState<number | null>(null)
+  const [professores, setProfessores] = useState<{ id: number; nome: string }[]>([])
 
   // Buscar alunos e professores
   useEffect(() => {
     const fetchAlunosEProfessores = async () => {
       try {
-        const alunosResponse = await buscaAluno(turmaId, 1, 100); 
-        const alunosData = alunosResponse.flatMap((classe) => classe.alunos);
+        const alunosResponse = await buscaAluno(turmaId, 1, 100)
+        const alunosData = alunosResponse.flatMap((classe) => classe.alunos)
 
         setAlunos(
           alunosData.map((aluno) => ({
             alunoId: aluno.alunoId,
             name: aluno.nome,
-          }))
-        );
+          })),
+        )
 
-        const professoresResponse = await buscaProfessor();
+        const professoresResponse = await buscaProfessor()
         setProfessores(
           professoresResponse.map((professor) => ({
             id: professor.id,
             nome: professor.nome,
-          }))
-        );
+          })),
+        )
       } catch (error) {
-        Alert.alert(
-          "Erro",
-          "Não foi possível buscar os alunos ou professores."
-        );
-        console.error("Erro ao buscar dados:", error);
-      }
-    };
-
-    fetchAlunosEProfessores();
-  }, [turmaId]);
-
-  // Preencher campos caso seja edição
-  useEffect(() => {
-    if (dadosRelatorio) {
-      setOferta(dadosRelatorio.oferta?.toString() || "");
-      setVisitantes(dadosRelatorio.visitantes?.toString() || "");
-      setBiblias(dadosRelatorio.quantidadeBiblias?.toString() || "");
-      setRevistas(dadosRelatorio.revistas?.toString() || "");
-      setObs(dadosRelatorio.observacao || "");
-      setProfessorId(dadosRelatorio.professorId || null);
-
-      if (dadosRelatorio.presencas) {
-        const presencaMap: Record<number, boolean> = {};
-        dadosRelatorio.presencas.forEach((p: any) => {
-          presencaMap[p.alunoId] = p.presente;
-        });
-        setSelectedItems(presencaMap);
+        Alert.alert("Erro", "Não foi possível buscar os alunos ou professores.")
+        console.error("Erro ao buscar dados:", error)
       }
     }
-  }, [dadosRelatorio]);
+
+    fetchAlunosEProfessores()
+  }, [turmaId])
+
+  useEffect(() => {
+    if (dadosRelatorio) {
+      console.log(" Dados recebidos para edição:", dadosRelatorio)
+
+      setOferta(dadosRelatorio.oferta?.toString() || "")
+      setVisitantes(dadosRelatorio.quantidadeVisitantes?.toString() || "")
+      setBiblias(dadosRelatorio.quantidadeBiblias?.toString() || "")
+      setRevistas(dadosRelatorio.quantidadeRevistas?.toString() || "")
+      setObs(dadosRelatorio.observacao || "")
+
+      if (dadosRelatorio.professorId) {
+        setProfessorId(dadosRelatorio.professorId)
+      } else if (dadosRelatorio.professor && professores.length > 0) {
+        const professorEncontrado = professores.find((p) => p.nome === dadosRelatorio.professor)
+        if (professorEncontrado) {
+          setProfessorId(professorEncontrado.id)
+        }
+      }
+
+      if (dadosRelatorio.presencas && Array.isArray(dadosRelatorio.presencas)) {
+        const presencaMap: Record<number, boolean> = {}
+        dadosRelatorio.presencas.forEach((p: any) => {
+          presencaMap[p.alunoId] = p.presente
+        })
+        setSelectedItems(presencaMap)
+        console.log("Presenças carregadas:", presencaMap)
+      }
+    }
+  }, [dadosRelatorio, professores])
 
   const toggleCheckbox = (id: number) => {
     setSelectedItems((prev) => ({
       ...prev,
       [id]: !prev[id],
-    }));
-  };
+    }))
+  }
 
   const handleSubmit = async () => {
     if (!professorId) {
-      Alert.alert("Campos obrigatórios", "Por favor, selecione o professor.");
-      return;
+      Alert.alert("Campos obrigatórios", "Por favor, selecione o professor.")
+      return
     }
-  
-    const ofertaValue = oferta.trim() === "" ? 0 : parseFloat(oferta);
-    const visitantesValue = visitantes.trim() === "" ? 0 : parseInt(visitantes);
-    const bibliasValue = biblias.trim() === "" ? 0 : parseInt(biblias);
-    const revistasValue = revistas.trim() === "" ? 0 : parseInt(revistas);
-  
-    if (
-      isNaN(ofertaValue) ||
-      isNaN(visitantesValue) ||
-      isNaN(bibliasValue) ||
-      isNaN(revistasValue)
-    ) {
-      Alert.alert("Erro", "Por favor, insira valores numéricos válidos.");
-      return;
+
+    const ofertaValue = oferta.trim() === "" ? 0 : Number.parseFloat(oferta)
+    const visitantesValue = visitantes.trim() === "" ? 0 : Number.parseInt(visitantes)
+    const bibliasValue = biblias.trim() === "" ? 0 : Number.parseInt(biblias)
+    const revistasValue = revistas.trim() === "" ? 0 : Number.parseInt(revistas)
+
+    if (isNaN(ofertaValue) || isNaN(visitantesValue) || isNaN(bibliasValue) || isNaN(revistasValue)) {
+      Alert.alert("Erro", "Por favor, insira valores numéricos válidos.")
+      return
     }
-  
-    const alunosPresentesIds = alunos
-      .filter((aluno) => selectedItems[aluno.alunoId])
-      .map((aluno) => aluno.alunoId);
-  
+
+    const alunosPresentesIds = alunos.filter((aluno) => selectedItems[aluno.alunoId]).map((aluno) => aluno.alunoId)
+
     if (alunosPresentesIds.length === 0) {
-      Alert.alert("Erro", "Selecione pelo menos um aluno presente.");
-      return;
+      Alert.alert("Erro", "Selecione pelo menos um aluno presente.")
+      return
     }
-  
-    setLoading(true);
-  
+
+    setLoading(true)
+
     try {
       if (relatorioId) {
-        // editar relatório
         const relatorioParaEditar: EditarRelatorioRequest = {
           id: relatorioId,
           data: dadosRelatorio?.data || new Date().toISOString(),
@@ -149,12 +150,12 @@ export function CadastrarRelatorio() {
             alunoId: aluno.alunoId,
             presente: !!selectedItems[aluno.alunoId],
           })),
-        };
+        }
 
-        await editarRelatorio(relatorioParaEditar);
-        Alert.alert("Sucesso", "Relatório atualizado com sucesso");
+        console.log("Enviando edição:", relatorioParaEditar)
+        await editarRelatorio(relatorioParaEditar)
+        Alert.alert("Sucesso", "Relatório atualizado com sucesso")
       } else {
-        // cadastrar relatório
         await cadastrarRelatorio(
           obs,
           ofertaValue,
@@ -163,25 +164,28 @@ export function CadastrarRelatorio() {
           revistasValue,
           visitantesValue,
           turmaId,
-          alunosPresentesIds
-        );
-        Alert.alert("Sucesso", "Relatório cadastrado com sucesso");
+          alunosPresentesIds,
+        )
+        Alert.alert("Sucesso", "Relatório cadastrado com sucesso")
       }
-  
-      setOferta("");
-      setVisitantes("");
-      setBiblias("");
-      setRevistas("");
-      setObs("");
-      setSelectedItems({});
-      setProfessorId(null);
-    } catch (error) {
-      Alert.alert("Erro", relatorioId ? "Erro ao atualizar o relatório." : "Erro ao cadastrar o relatório.");
-      console.error("Erro ao enviar relatório:", error);
+
+      if (!relatorioId) {
+        setOferta("")
+        setVisitantes("")
+        setBiblias("")
+        setRevistas("")
+        setObs("")
+        setSelectedItems({})
+        setProfessorId(null)
+      }
+    } catch (error: any) {
+      const errorMessage = error.message || "Erro desconhecido ao processar o relatório."
+      Alert.alert("Erro", errorMessage, [{ text: "OK" }])
+      console.error("Erro ao enviar relatório:", error)
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   const renderItem: ListRenderItem<Item> = ({ item }) => (
     <View style={styles.studentItem}>
@@ -193,14 +197,11 @@ export function CadastrarRelatorio() {
       />
       <Text style={styles.studentName}>{item.name}</Text>
     </View>
-  );
+  )
 
   return (
-    <KeyboardAvoidingView 
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
-      style={styles.container}
-    >
-      <ScrollView 
+    <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={styles.container}>
+      <ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.scrollViewContent}
         showsVerticalScrollIndicator={false}
@@ -213,7 +214,7 @@ export function CadastrarRelatorio() {
         <View style={styles.formCard}>
           <View style={styles.formSection}>
             <Text style={styles.sectionTitle}>Informações Gerais</Text>
-            
+
             <View style={styles.inputGroup}>
               <Text style={styles.label}>Ofertas (R$):</Text>
               <TextInput
@@ -225,7 +226,7 @@ export function CadastrarRelatorio() {
                 placeholderTextColor="#8A94A6"
               />
             </View>
-            
+
             <View style={styles.inputGroup}>
               <Text style={styles.label}>Visitantes:</Text>
               <TextInput
@@ -237,7 +238,7 @@ export function CadastrarRelatorio() {
                 placeholderTextColor="#8A94A6"
               />
             </View>
-            
+
             <View style={styles.inputGroup}>
               <Text style={styles.label}>Bíblias:</Text>
               <TextInput
@@ -249,7 +250,7 @@ export function CadastrarRelatorio() {
                 placeholderTextColor="#8A94A6"
               />
             </View>
-            
+
             <View style={styles.inputGroup}>
               <Text style={styles.label}>Revistas:</Text>
               <TextInput
@@ -261,7 +262,7 @@ export function CadastrarRelatorio() {
                 placeholderTextColor="#8A94A6"
               />
             </View>
-            
+
             <View style={styles.inputGroup}>
               <Text style={styles.label}>Professor:</Text>
               <View style={styles.pickerContainer}>
@@ -272,16 +273,12 @@ export function CadastrarRelatorio() {
                 >
                   <Picker.Item label="Selecione" value={null} />
                   {professores.map((professor) => (
-                    <Picker.Item
-                      key={professor.id}
-                      label={professor.nome}
-                      value={professor.id}
-                    />
+                    <Picker.Item key={professor.id} label={professor.nome} value={professor.id} />
                   ))}
                 </Picker>
               </View>
             </View>
-            
+
             <View style={styles.inputGroup}>
               <Text style={styles.label}>Observações:</Text>
               <TextInput
@@ -300,7 +297,7 @@ export function CadastrarRelatorio() {
 
         <View style={styles.studentsCard}>
           <Text style={styles.sectionTitle}>Alunos Presentes</Text>
-          
+
           {alunos.length === 0 ? (
             <View style={styles.emptyState}>
               <Text style={styles.emptyStateText}>Nenhum aluno encontrado.</Text>
@@ -317,10 +314,7 @@ export function CadastrarRelatorio() {
         </View>
 
         <TouchableOpacity
-          style={[
-            styles.submitButton,
-            (loading || alunos.length === 0) && styles.disabledButton
-          ]}
+          style={[styles.submitButton, (loading || alunos.length === 0) && styles.disabledButton]}
           onPress={handleSubmit}
           disabled={loading || alunos.length === 0}
         >
@@ -332,5 +326,5 @@ export function CadastrarRelatorio() {
         </TouchableOpacity>
       </ScrollView>
     </KeyboardAvoidingView>
-  );
+  )
 }

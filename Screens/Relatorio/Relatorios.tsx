@@ -1,6 +1,6 @@
-"use client"
-
 import { useState, useCallback } from "react"
+import { Picker } from "@react-native-picker/picker"
+import DateTimePickerModal from "react-native-modal-datetime-picker"
 import {
   Text,
   View,
@@ -11,7 +11,6 @@ import {
   ScrollView,
   SafeAreaView,
 } from "react-native"
-import { Picker } from "@react-native-picker/picker"
 import styles from "./StyleRelatorio"
 import { CardRelatorio } from "../../components/CardRelatorio/CardRelatorio"
 import {
@@ -31,32 +30,54 @@ interface ListaRelatorioConsolidado extends ListaRelatorioResponse {
   totalRevistas?: number
   totalVisitantes?: number
   totalBiblias?: number
-  totalOfertas?: number
+  totalOferta?: number
   totalPresentes?: number
+}
+
+// Função para pegar a data de hoje no horário de Brasília (UTC-3)
+const hojeBrasilia = (): Date => {
+  const now = new Date()
+  const offset = -3 * 60 // -3 horas em minutos
+  const brasiliaTime = new Date(now.getTime() + offset * 60 * 1000 + now.getTimezoneOffset() * 60000)
+  return brasiliaTime
 }
 
 export function Relatorios() {
   const navigation = useNavigation<NavigationProp<RootStackParamList>>()
   const [selectedTurma, setSelectedTurma] = useState<number | undefined>(undefined)
-  const [selectedData, setSelectedData] = useState("Selecione")
   const [relatorios, setRelatorios] = useState<ListaRelatorioConsolidado[]>([])
   const [loading, setLoading] = useState(false)
   const [turmas, setTurmas] = useState<{ id: number; nome: string }[]>([])
   const [activeSection, setActiveSection] = useState<"comum" | "consolidado">("comum")
 
+  const [startDate, setStartDate] = useState<Date>(hojeBrasilia())
+  const [endDate, setEndDate] = useState<Date>(hojeBrasilia())
+  const [showStartPicker, setShowStartPicker] = useState(false)
+  const [showEndPicker, setShowEndPicker] = useState(false)
+
+  // Formata data para envio à API (YYYY-MM-DD)
+  const formatDate = (date: Date) => {
+    const yyyy = date.getFullYear()
+    const mm = String(date.getMonth() + 1).padStart(2, "0")
+    const dd = String(date.getDate()).padStart(2, "0")
+    return `${yyyy}-${mm}-${dd}`
+  }
+
+  // Formata data para exibição em formato brasileiro (DD/MM/YYYY)
+  const formatDateBR = (date: Date) => {
+    const dd = String(date.getDate()).padStart(2, "0")
+    const mm = String(date.getMonth() + 1).padStart(2, "0")
+    const yyyy = date.getFullYear()
+    return `${dd}/${mm}/${yyyy}`
+  }
+
   // Busca os relatórios
   const fetchRelatorios = async () => {
     setLoading(true)
-
     const params: { classeId?: number; startDate?: string; endDate?: string } = {}
 
-    if (selectedData !== "Selecione") {
-      const [year, month] = selectedData.split("-")
-      const lastDay = new Date(Number(year), Number(month), 0).getDate()
-      params.startDate = `${selectedData}-01`
-      params.endDate = `${selectedData}-${lastDay}`
-    }
-
+    params.startDate = formatDate(startDate)
+    params.endDate = formatDate(endDate)
     if (selectedTurma !== undefined) params.classeId = selectedTurma
 
     try {
@@ -64,27 +85,22 @@ export function Relatorios() {
 
       if (activeSection === "consolidado") {
         const consolidated: RelatorioConsolidadoResponse = await listarRelatoriosConsolidado(params)
-        console.log("[v0] Dados consolidados da API:", consolidated)
-        console.log("[v0] Total Ofertas:", consolidated.totalOferta)
-        console.log("[v0] Total Presentes:", consolidated.totalPresentes)
-
         const hasData = Object.values(consolidated).some((value) => value > 0)
         if (hasData) {
           data = [
             {
               relatorioId: 1,
               nomeClasse: "Consolidado",
-              data: `${params.startDate || ""} até ${params.endDate || ""}`,
+              data: `${formatDateBR(startDate)} até ${formatDateBR(endDate)}`,
               quantidadePresentes: consolidated.totalPresentes,
               totalPresentes: consolidated.totalPresentes,
               totalBiblias: consolidated.totalBiblias,
-              totalOfertas: consolidated.totalOferta,
+              totalOferta: consolidated.totalOferta,
               totalRevistas: consolidated.totalRevistas,
               totalVisitantes: consolidated.totalVisitantes,
               totalFaltas: consolidated.totalFaltas,
             },
           ]
-          console.log("[v0] Objeto consolidado criado:", data[0])
         }
       } else {
         data = await listarRelatorios(params)
@@ -92,7 +108,6 @@ export function Relatorios() {
 
       setRelatorios(data)
     } catch (error) {
-      console.error("Erro ao buscar relatórios:", error)
       Alert.alert("Erro", "Não foi possível carregar os relatórios.")
     } finally {
       setLoading(false)
@@ -110,13 +125,13 @@ export function Relatorios() {
   }
 
   useFocusEffect(
-    useCallback(() => {
-      fetchTurmas()
-      fetchRelatorios()
-    }, [selectedTurma, selectedData, activeSection]),
-  )
+  useCallback(() => {
+    fetchTurmas()
+    fetchRelatorios()
+  }, [selectedTurma, activeSection])
+)
 
-  // FlatList press
+
   const onPressRelatorio = (relatorio: ListaRelatorioConsolidado) => {
     navigation.navigate("DetalhesRelatorio", {
       relatorioId: relatorio.relatorioId ?? 0,
@@ -160,6 +175,7 @@ export function Relatorios() {
           </View>
 
           <View style={styles.filterRow}>
+            {/* Turma */}
             <View style={styles.filterColumn}>
               <Text style={styles.filterLabel}>Turma</Text>
               <View style={styles.pickerContainer}>
@@ -179,29 +195,45 @@ export function Relatorios() {
               </View>
             </View>
 
+            {/* Datas */}
             <View style={styles.filterColumn}>
-              <Text style={styles.filterLabel}>Mês</Text>
-              <View style={styles.pickerContainer}>
-                <Picker
-                  selectedValue={selectedData}
-                  style={styles.picker}
-                  onValueChange={(itemValue) => setSelectedData(itemValue)}
-                  dropdownIconColor="#6C5CE7"
-                >
-                  <Picker.Item label="Todos" value="Selecione" />
-                  {[...Array(12)].map((_, i) => {
-                    const month = (i + 1).toString().padStart(2, "0")
-                    const label = new Date(2025, i).toLocaleString("pt-BR", { month: "long" })
-                    return (
-                      <Picker.Item
-                        key={month}
-                        label={`${label.charAt(0).toUpperCase()}${label.slice(1)}`}
-                        value={`2025-${month}`}
-                      />
-                    )
-                  })}
-                </Picker>
-              </View>
+              <Text style={styles.filterLabel}>Data Início</Text>
+              <TouchableOpacity
+                style={styles.datePickerButton}
+                onPress={() => setShowStartPicker(true)}
+              >
+                <Text style={styles.datePickerText}>{formatDateBR(startDate)}</Text>
+              </TouchableOpacity>
+
+              <DateTimePickerModal
+                isVisible={showStartPicker}
+                mode="date"
+                date={startDate}
+                onConfirm={(date) => {
+                  setStartDate(date)
+                  setShowStartPicker(false)
+                }}
+                onCancel={() => setShowStartPicker(false)}
+              />
+
+              <Text style={[styles.filterLabel, { marginTop: 10 }]}>Data Fim</Text>
+              <TouchableOpacity
+                style={styles.datePickerButton}
+                onPress={() => setShowEndPicker(true)}
+              >
+                <Text style={styles.datePickerText}>{formatDateBR(endDate)}</Text>
+              </TouchableOpacity>
+
+              <DateTimePickerModal
+                isVisible={showEndPicker}
+                mode="date"
+                date={endDate}
+                onConfirm={(date) => {
+                  setEndDate(date)
+                  setShowEndPicker(false)
+                }}
+                onCancel={() => setShowEndPicker(false)}
+              />
             </View>
           </View>
         </View>
@@ -237,7 +269,7 @@ export function Relatorios() {
                   return (
                     (item.totalPresentes ?? 0) > 0 ||
                     (item.totalBiblias ?? 0) > 0 ||
-                    (item.totalOfertas ?? 0) > 0 ||
+                    (item.totalOferta ?? 0) > 0 ||
                     (item.totalRevistas ?? 0) > 0 ||
                     (item.totalVisitantes ?? 0) > 0 ||
                     (item.totalFaltas ?? 0) > 0

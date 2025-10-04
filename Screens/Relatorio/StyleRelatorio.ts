@@ -174,6 +174,23 @@ const styles = StyleSheet.create({
     color: "#333B69",
     marginLeft: 10,
   },
+  datePickerButton: {
+  paddingVertical: 10,
+  paddingHorizontal: 15,
+  borderWidth: 1,
+  borderColor: "#6C5CE7",
+  borderRadius: 8,
+  backgroundColor: "#F0F0FF",
+  marginTop: 5,
+},
+
+datePickerText: {
+  color: "#6C5CE7",
+  fontSize: 14,
+  textAlign: "center",
+},
+
+
 });
 
 export default styles;
