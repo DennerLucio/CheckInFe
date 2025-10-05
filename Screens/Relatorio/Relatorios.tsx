@@ -1,3 +1,5 @@
+"use client"
+
 import { useState, useCallback } from "react"
 import { Picker } from "@react-native-picker/picker"
 import DateTimePickerModal from "react-native-modal-datetime-picker"
@@ -24,7 +26,6 @@ import { useNavigation, type NavigationProp, useFocusEffect } from "@react-navig
 import type { RootStackParamList } from "../../App"
 import { Feather } from "@expo/vector-icons"
 
-// Extensão para consolidado
 interface ListaRelatorioConsolidado extends ListaRelatorioResponse {
   totalFaltas?: number
   totalRevistas?: number
@@ -34,10 +35,9 @@ interface ListaRelatorioConsolidado extends ListaRelatorioResponse {
   totalPresentes?: number
 }
 
-// Função para pegar a data de hoje no horário de Brasília (UTC-3)
 const hojeBrasilia = (): Date => {
   const now = new Date()
-  const offset = -3 * 60 // -3 horas em minutos
+  const offset = -3 * 60
   const brasiliaTime = new Date(now.getTime() + offset * 60 * 1000 + now.getTimezoneOffset() * 60000)
   return brasiliaTime
 }
@@ -55,15 +55,15 @@ export function Relatorios() {
   const [showStartPicker, setShowStartPicker] = useState(false)
   const [showEndPicker, setShowEndPicker] = useState(false)
 
-  // Formata data para envio à API (YYYY-MM-DD)
-  const formatDate = (date: Date) => {
-    const yyyy = date.getFullYear()
-    const mm = String(date.getMonth() + 1).padStart(2, "0")
-    const dd = String(date.getDate()).padStart(2, "0")
-    return `${yyyy}-${mm}-${dd}`
+  // Função genérica: converte meia-noite local -> UTC e opcionalmente soma dias (use addDays=1 para endDate).
+  const formatDateToUtc = (date: Date, addDays = 0): string => {
+    const localMidnight = new Date(date)
+    localMidnight.setHours(0, 0, 0, 0) // meia-noite local
+    const timezoneOffsetMs = localMidnight.getTimezoneOffset() * 60000
+    const utcDate = new Date(localMidnight.getTime() - timezoneOffsetMs + addDays * 86400000)
+    return utcDate.toISOString().split("T")[0] // yyyy-mm-dd
   }
 
-  // Formata data para exibição em formato brasileiro (DD/MM/YYYY)
   const formatDateBR = (date: Date) => {
     const dd = String(date.getDate()).padStart(2, "0")
     const mm = String(date.getMonth() + 1).padStart(2, "0")
@@ -71,13 +71,17 @@ export function Relatorios() {
     return `${dd}/${mm}/${yyyy}`
   }
 
-  // Busca os relatórios
   const fetchRelatorios = async () => {
     setLoading(true)
     const params: { classeId?: number; startDate?: string; endDate?: string } = {}
 
-    params.startDate = formatDate(startDate)
-    params.endDate = formatDate(endDate)
+    // startDate: meia-noite local convertida pra UTC (yyyy-mm-dd)
+    params.startDate = formatDateToUtc(startDate, 0)
+
+    // endDate: enviar o dia seguinte em UTC para incluir todo o dia selecionado
+    // (muitos backends usam end-exclusive ou comparam < endDate)
+    params.endDate = formatDateToUtc(endDate, 1)
+
     if (selectedTurma !== undefined) params.classeId = selectedTurma
 
     try {
@@ -101,6 +105,8 @@ export function Relatorios() {
               totalFaltas: consolidated.totalFaltas,
             },
           ]
+        } else {
+          data = []
         }
       } else {
         data = await listarRelatorios(params)
@@ -114,7 +120,6 @@ export function Relatorios() {
     }
   }
 
-  // Busca turmas
   const fetchTurmas = async () => {
     try {
       const response: GetTurmaResponse = await buscaTurmas()
@@ -125,12 +130,17 @@ export function Relatorios() {
   }
 
   useFocusEffect(
-  useCallback(() => {
-    fetchTurmas()
-    fetchRelatorios()
-  }, [selectedTurma, activeSection])
-)
+    useCallback(() => {
+      fetchTurmas()
+    }, []),
+  )
 
+  // Atualiza automaticamente sempre que filtros mudarem
+  useFocusEffect(
+    useCallback(() => {
+      fetchRelatorios()
+    }, [selectedTurma, startDate, endDate, activeSection]),
+  )
 
   const onPressRelatorio = (relatorio: ListaRelatorioConsolidado) => {
     navigation.navigate("DetalhesRelatorio", {
@@ -167,7 +177,6 @@ export function Relatorios() {
       </View>
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-        {/* FILTROS */}
         <View style={styles.filterCard}>
           <View style={styles.cardHeader}>
             <Feather name="filter" size={20} color="#6C5CE7" />
@@ -175,7 +184,6 @@ export function Relatorios() {
           </View>
 
           <View style={styles.filterRow}>
-            {/* Turma */}
             <View style={styles.filterColumn}>
               <Text style={styles.filterLabel}>Turma</Text>
               <View style={styles.pickerContainer}>
@@ -195,13 +203,9 @@ export function Relatorios() {
               </View>
             </View>
 
-            {/* Datas */}
             <View style={styles.filterColumn}>
               <Text style={styles.filterLabel}>Data Início</Text>
-              <TouchableOpacity
-                style={styles.datePickerButton}
-                onPress={() => setShowStartPicker(true)}
-              >
+              <TouchableOpacity style={styles.datePickerButton} onPress={() => setShowStartPicker(true)}>
                 <Text style={styles.datePickerText}>{formatDateBR(startDate)}</Text>
               </TouchableOpacity>
 
@@ -217,10 +221,7 @@ export function Relatorios() {
               />
 
               <Text style={[styles.filterLabel, { marginTop: 10 }]}>Data Fim</Text>
-              <TouchableOpacity
-                style={styles.datePickerButton}
-                onPress={() => setShowEndPicker(true)}
-              >
+              <TouchableOpacity style={styles.datePickerButton} onPress={() => setShowEndPicker(true)}>
                 <Text style={styles.datePickerText}>{formatDateBR(endDate)}</Text>
               </TouchableOpacity>
 
@@ -238,7 +239,6 @@ export function Relatorios() {
           </View>
         </View>
 
-        {/* RELATÓRIOS */}
         <View style={styles.reportsCard}>
           <View style={styles.cardHeader}>
             <Feather name={activeSection === "comum" ? "file-text" : "bar-chart-2"} size={20} color="#6C5CE7" />

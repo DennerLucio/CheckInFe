@@ -14,7 +14,11 @@ export interface AlunoResponse {
     relatorios: any | null;
 }
 
-
+export interface Aluno {
+  id: number;
+  nome: string;
+  classeId: number;
+}
 
 export const cadastraAluno = async ( nome:string, classeId:number): Promise<CadastrarPessoaResponse> => {
     console.log(nome, classeId)
@@ -53,6 +57,19 @@ export const cadastraProfessor = async (nome:string, classeId:number): Promise<C
         throw error;
     }
 };
+
+
+
+export const buscaAlunos = async (classeId: number): Promise<Aluno[]> => {
+  try {
+    const response = await api.get<Aluno[]>(`/api/Aluno?classeId=${classeId}`);
+    return response.data;
+  } catch (error) {
+    console.error("Erro ao buscar alunos:", error);
+    throw error;
+  }
+};
+
 
 export const buscaProfessor = async (): Promise<ProfessorResponse[]> => {
     try {
