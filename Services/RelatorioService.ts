@@ -246,6 +246,7 @@ export const editarRelatorio = async (relatorio: EditarRelatorioRequest): Promis
         "Content-Type": "application/json-patch+json",
       },
     })
+      
     console.log("✅ Relatório editado com sucesso:", response.data)
     return response.data
   } catch (error: any) {

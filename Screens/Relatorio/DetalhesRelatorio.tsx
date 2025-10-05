@@ -1,6 +1,5 @@
-"use client"
+import React, { useState, useCallback } from "react"
 
-import { useEffect, useState } from "react"
 import { View, Text, StyleSheet, ActivityIndicator, TouchableOpacity, Alert } from "react-native"
 import {
   infoRelatorio,
@@ -12,6 +11,7 @@ import type { RouteProp } from "@react-navigation/native"
 import type { RootStackParamList } from "../../App"
 import { AxiosError } from "axios"
 import * as NavigationServices from "../../Services/NavigationServices"
+import { useFocusEffect } from "@react-navigation/native"
 
 interface DetalhesRelatorioProps {
   route: RouteProp<RootStackParamList, "DetalhesRelatorio">
@@ -51,29 +51,38 @@ export function DetalhesRelatorio({ route }: DetalhesRelatorioProps) {
   const [loading, setLoading] = useState(!(dadosRelatorio && isConsolidado(dadosRelatorio)))
   const [error, setError] = useState<string | null>(null)
 
-  useEffect(() => {
-    const isConsolidadoReport = dadosRelatorio && isConsolidado(dadosRelatorio)
+  // Atualiza sempre que a tela recebe foco
+  useFocusEffect(
+    React.useCallback(() => {
+      let isActive = true
 
-    if (isConsolidadoReport) {
-      setRelatorio(dadosRelatorio)
-      setLoading(false)
-      return
-    }
-
-    const fetchRelatorio = async () => {
-      try {
-        const data = await infoRelatorio(relatorioId)
-        setRelatorio(data)
-      } catch (error) {
-        console.error("Erro ao buscar detalhes do relatório:", error)
-        setError("Não foi possível carregar os detalhes do relatório.")
-      } finally {
+      const isConsolidadoReport = dadosRelatorio && isConsolidado(dadosRelatorio)
+      if (isConsolidadoReport) {
+        setRelatorio(dadosRelatorio)
         setLoading(false)
+        return
       }
-    }
 
-    fetchRelatorio()
-  }, [relatorioId, dadosRelatorio])
+      const fetchRelatorio = async () => {
+        try {
+          setLoading(true)
+          const data = await infoRelatorio(relatorioId)
+          if (isActive) setRelatorio(data)
+        } catch (error) {
+          console.error("Erro ao buscar detalhes do relatório:", error)
+          if (isActive) setError("Não foi possível carregar os detalhes do relatório.")
+        } finally {
+          if (isActive) setLoading(false)
+        }
+      }
+
+      fetchRelatorio()
+
+      return () => {
+        isActive = false
+      }
+    }, [relatorioId, dadosRelatorio])
+  )
 
   const handleGerarRelatorio = async () => {
     try {
